@@ -98,6 +98,30 @@ test('missing soul/blank resources and insufficient maximum mana are not hidden 
   assert.equal(runePlan({ ...batch, currentMana: 800 }), null);
 });
 
+test('zero soul is a known no-cost recipe and never divides by zero', () => {
+  const freeSoul = runePlan({ ...batch, soulPerCast: 0, currentSoul: 0 })!;
+  assert.equal(freeSoul.soulNeeded, 0);
+  assert.equal(freeSoul.soulShortfall, 0);
+  assert.equal(freeSoul.soulLimited, false);
+  assert.equal(freeSoul.availableSoulCasts, null);
+  assert.equal(freeSoul.resourcesSufficient, true);
+  assert.equal(freeSoul.regenerationSeconds, 5320);
+  const unknownSoul = runePlan({ ...batch, soulPerCast: null, currentSoul: 0 })!;
+  assert.equal(unknownSoul.soulLimited, null);
+  assert.equal(unknownSoul.resourcesSufficient, false);
+  assert.equal(runePlan({ ...batch, soulPerCast: -1 }), null);
+});
+
+test('zero-mana server recipes need no recovery while unsafe batch totals are rejected', () => {
+  const freeMana = runePlan({ ...batch, manaPerCast: 0, currentMana: 0, maximumMana: 0, soulPerCast: 0 })!;
+  assert.equal(freeMana.mana, 0);
+  assert.equal(freeMana.capacityFits, true);
+  assert.equal(freeMana.regenerationSeconds, 0);
+  assert.equal(freeMana.resourcesSufficient, true);
+  assert.equal(runePlan({ ...batch, manaPerCast: Number.MAX_SAFE_INTEGER }), null);
+  assert.equal(runePlan({ ...batch, chargesPerObject: Number.MAX_SAFE_INTEGER }), null);
+});
+
 test('level-based stats preserve the level-8 vocation boundary', () => {
   assert.deepEqual(characterStats(8, 'druid'), { hp: 185, mana: 35, capacity: 470 });
   assert.deepEqual(characterStats(25, 'druid'), { hp: 270, mana: 545, capacity: 640 });

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "retrieved_on": "2026-10-30T10:53:19.345514+00:00",
+  "retrieved_on": "2026-10-30T13:07:51.467915+00:00",
   "source_index": "https://primibia.com/wiki/items",
   "source_index_sha256": "81c7be2049b156af168e72426d4bddca309f46113f0049301ba45fe34e5e0e8f",
   "provenance": "Original PNG files linked from the Primibia 7.72 item wiki. The source is a community reconstruction; its historical version claim is not official CipSoft certification.",
@@ -11,7 +11,8 @@
     "creature_loot_names": 289,
     "rune_types": 27,
     "food_names": 37,
-    "downloaded_files": 356
+    "melee_weapon_names": 84,
+    "downloaded_files": 374
   },
   "assets": [
     {
@@ -79,6 +80,17 @@
       "width": 20,
       "height": 23,
       "sha256": "658f901fa8fdb3392cc6df0c1f5b0f0900d515c2c1929ec511812253b56c4e7a"
+    },
+    {
+      "name": "Arcane Staff",
+      "slug": "arcane-staff",
+      "source_page": "https://primibia.com/wiki/items/arcane-staff",
+      "source_image": "https://primibia.com/wiki-sprites/items/arcane-staff.png",
+      "local_path": "/assets/items/arcane-staff.png",
+      "bytes": 559,
+      "width": 31,
+      "height": 31,
+      "sha256": "945b1a301ada3723a73535502bf3b80664dad7352d81e5897a67825bde4606cf"
     },
     {
       "name": "Arrow",
@@ -211,6 +223,17 @@
       "width": 17,
       "height": 30,
       "sha256": "19f0542e9a2908da87221dea651aaa49bf486644821a7b092851df546ca573de"
+    },
+    {
+      "name": "Beastslayer Axe",
+      "slug": "beastslayer-axe",
+      "source_page": "https://primibia.com/wiki/items/beastslayer-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/beastslayer-axe.png",
+      "local_path": "/assets/items/beastslayer-axe.png",
+      "bytes": 634,
+      "width": 32,
+      "height": 29,
+      "sha256": "e803002382d086e12ce45255fa33f1f407700ee41786dc5c5673da97efe394f9"
     },
     {
       "name": "Beholder Helmet",
@@ -983,6 +1006,17 @@
       "sha256": "4075a7a4ef0e35db7df770b63d624f63f5c8176a10c5ba3ddf165e267c9c1687"
     },
     {
+      "name": "Crystal Mace",
+      "slug": "crystal-mace",
+      "source_page": "https://primibia.com/wiki/items/crystal-mace",
+      "source_image": "https://primibia.com/wiki-sprites/items/crystal-mace.png",
+      "local_path": "/assets/items/crystal-mace.png",
+      "bytes": 857,
+      "width": 31,
+      "height": 31,
+      "sha256": "4b60f037a479967dff8a431597d43cf181db822ddcf9d0c4cb6edac40ad06961"
+    },
+    {
       "name": "Crystal Necklace",
       "slug": "crystal-necklace",
       "source_page": "https://primibia.com/wiki/items/crystal-necklace",
@@ -1014,6 +1048,17 @@
       "width": 16,
       "height": 26,
       "sha256": "c3a5689e64e5655e4e9e1ec08fd2c6e243c8360c8e2562064b833fbf2c316e64"
+    },
+    {
+      "name": "Daramanian Axe",
+      "slug": "daramanian-axe",
+      "source_page": "https://primibia.com/wiki/items/daramanian-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/daramanian-axe.png",
+      "local_path": "/assets/items/daramanian-axe.png",
+      "bytes": 712,
+      "width": 29,
+      "height": 29,
+      "sha256": "25f5bb619605a6d6297dd42dbf3d65e6d5610797f6b997100cafc94fae59b9ca"
     },
     {
       "name": "Daramanian Mace",
@@ -1181,6 +1226,17 @@
       "sha256": "01fd62c02525eff60b7992dbd0e221808e10c3379098da89d04a129220b74b59"
     },
     {
+      "name": "Djinn Blade",
+      "slug": "djinn-blade",
+      "source_page": "https://primibia.com/wiki/items/djinn-blade",
+      "source_image": "https://primibia.com/wiki-sprites/items/djinn-blade.png",
+      "local_path": "/assets/items/djinn-blade.png",
+      "bytes": 551,
+      "width": 32,
+      "height": 28,
+      "sha256": "ce7cc23bead759448587fc3a2109a668b8bb8c17dcd3f91b8955ea73f78cb849"
+    },
+    {
       "name": "Doll",
       "slug": "doll",
       "source_page": "https://primibia.com/wiki/items/doll",
@@ -1291,6 +1347,17 @@
       "sha256": "bce2ede99ad3343522e44638497bea8d0ff25ae3c91fdd54b0159314d15b3cff"
     },
     {
+      "name": "Dwarven Axe",
+      "slug": "dwarven-axe",
+      "source_page": "https://primibia.com/wiki/items/dwarven-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/dwarven-axe.png",
+      "local_path": "/assets/items/dwarven-axe.png",
+      "bytes": 1184,
+      "width": 27,
+      "height": 31,
+      "sha256": "82f7b31461fa79d31ce276124279833142839bdb1dd6e0c9ea5eaa1d02173977"
+    },
+    {
       "name": "Dwarven Ring",
       "slug": "dwarven-ring",
       "source_page": "https://primibia.com/wiki/items/dwarven-ring",
@@ -1355,6 +1422,17 @@
       "width": 16,
       "height": 13,
       "sha256": "521102fb3a9a04016b316476ecfcad8f8a0385dd3dc4d29af3462f7b02673f9e"
+    },
+    {
+      "name": "Enchanted Staff",
+      "slug": "enchanted-staff",
+      "source_page": "https://primibia.com/wiki/items/enchanted-staff",
+      "source_image": "https://primibia.com/wiki-sprites/items/enchanted-staff.png",
+      "local_path": "/assets/items/enchanted-staff.png",
+      "bytes": 496,
+      "width": 32,
+      "height": 32,
+      "sha256": "a88cfa4e64d4b2c5a05d95aaf420d5d06fef538ec5947cbaf6fbfdb38c485ba6"
     },
     {
       "name": "Energy Field Rune",
@@ -1533,6 +1611,17 @@
       "sha256": "e737900fa29f4ba52271b4cd7fd33911e46fa8dbc4bc6f9af821310a49c45d65"
     },
     {
+      "name": "Foil",
+      "slug": "foil",
+      "source_page": "https://primibia.com/wiki/items/foil",
+      "source_image": "https://primibia.com/wiki-sprites/items/foil.png",
+      "local_path": "/assets/items/foil.png",
+      "bytes": 480,
+      "width": 31,
+      "height": 32,
+      "sha256": "ae0ab07a9c9d116652d4e1451142bf2c87608b9746fd3f176b92742a5ec146b9"
+    },
+    {
       "name": "Garlic Necklace",
       "slug": "garlic-necklace",
       "source_page": "https://primibia.com/wiki/items/garlic-necklace",
@@ -1542,6 +1631,17 @@
       "width": 20,
       "height": 29,
       "sha256": "b486e454cc9c4e9861688e08d2e79da625e16c7903090381400c0529a526ee5a"
+    },
+    {
+      "name": "Giant Smithhammer",
+      "slug": "giant-smithhammer",
+      "source_page": "https://primibia.com/wiki/items/giant-smithhammer",
+      "source_image": "https://primibia.com/wiki-sprites/items/giant-smithhammer.png",
+      "local_path": "/assets/items/giant-smithhammer.png",
+      "bytes": 493,
+      "width": 26,
+      "height": 26,
+      "sha256": "6a9a4c0957e40298729e773bb735a3ecc3506ba70b3b11fa9a6acba2150ee0e2"
     },
     {
       "name": "Giant Sword",
@@ -1797,6 +1897,17 @@
       "sha256": "9bbbca590b2cc43725126475384846e0a677dd84f33d113cf444570a9d565a9d"
     },
     {
+      "name": "Hammer of Wrath",
+      "slug": "hammer-of-wrath",
+      "source_page": "https://primibia.com/wiki/items/hammer-of-wrath",
+      "source_image": "https://primibia.com/wiki-sprites/items/hammer-of-wrath.png",
+      "local_path": "/assets/items/hammer-of-wrath.png",
+      "bytes": 976,
+      "width": 32,
+      "height": 32,
+      "sha256": "d0cd563083aaf881126eb3b649e26fda8277cad8de658927c3e97e02c5650982"
+    },
+    {
       "name": "Hand Axe",
       "slug": "hand-axe",
       "source_page": "https://primibia.com/wiki/items/hand-axe",
@@ -1817,6 +1928,17 @@
       "width": 15,
       "height": 32,
       "sha256": "1b60735fafad82629fafe2b398f394c00271fd071af15677108e4460d2fae6b0"
+    },
+    {
+      "name": "Heavy Mace",
+      "slug": "heavy-mace",
+      "source_page": "https://primibia.com/wiki/items/heavy-mace",
+      "source_image": "https://primibia.com/wiki-sprites/items/heavy-mace.png",
+      "local_path": "/assets/items/heavy-mace.png",
+      "bytes": 890,
+      "width": 31,
+      "height": 31,
+      "sha256": "f28914df1145031cc50d0010ca01d80f94574644c21a4ca985a73279c518d435"
     },
     {
       "name": "Heavy Machete",
@@ -2094,6 +2216,17 @@
       "sha256": "2d4bfd973770c9d0370293fda1b055cca4acd51b292b5b51d4fc5e53e9711d93"
     },
     {
+      "name": "Lich Staff",
+      "slug": "lich-staff",
+      "source_page": "https://primibia.com/wiki/items/lich-staff",
+      "source_image": "https://primibia.com/wiki-sprites/items/lich-staff.png",
+      "local_path": "/assets/items/lich-staff.png",
+      "bytes": 552,
+      "width": 31,
+      "height": 32,
+      "sha256": "d4e4e90ac0c184af98ead67ba0bca391261e2a655868e316cc9a26929206c9ec"
+    },
+    {
       "name": "Life Crystal",
       "slug": "life-crystal",
       "source_page": "https://primibia.com/wiki/items/life-crystal",
@@ -2114,6 +2247,17 @@
       "width": 10,
       "height": 10,
       "sha256": "8152e4bd19b4479bc4fce94442c820e35ec92bf77c68fb00d75160e32b5edeff"
+    },
+    {
+      "name": "Light Mace",
+      "slug": "light-mace",
+      "source_page": "https://primibia.com/wiki/items/light-mace",
+      "source_image": "https://primibia.com/wiki-sprites/items/light-mace.png",
+      "local_path": "/assets/items/light-mace.png",
+      "bytes": 333,
+      "width": 8,
+      "height": 24,
+      "sha256": "bbe94c71b27c0ddd956a02dda924c6b4b6fb0f48cc4482dadf4f23e6ffe62070"
     },
     {
       "name": "Light Magic Missile Rune",
@@ -2468,6 +2612,17 @@
       "sha256": "595846880711d9d828e0afefd1955d69b692c4378c161657f4bb7c4edc9519b8"
     },
     {
+      "name": "Pharaoh Sword",
+      "slug": "pharaoh-sword",
+      "source_page": "https://primibia.com/wiki/items/pharaoh-sword",
+      "source_image": "https://primibia.com/wiki-sprites/items/pharaoh-sword.png",
+      "local_path": "/assets/items/pharaoh-sword.png",
+      "bytes": 553,
+      "width": 32,
+      "height": 32,
+      "sha256": "ba0ab84185a20797dd3207f8454da82eeb6ee504d7b5865dbbee95598b1873b9"
+    },
+    {
       "name": "Pick",
       "slug": "pick",
       "source_page": "https://primibia.com/wiki/items/pick",
@@ -2675,6 +2830,17 @@
       "width": 25,
       "height": 25,
       "sha256": "1a679ee1339b5a4fdedcc11160c009598504e86b0eb54c579ccbd87e5d2285f1"
+    },
+    {
+      "name": "Ravager'S Axe",
+      "slug": "ravagers-axe",
+      "source_page": "https://primibia.com/wiki/items/ravagers-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/ravagers-axe.png",
+      "local_path": "/assets/items/ravagers-axe.png",
+      "bytes": 865,
+      "width": 32,
+      "height": 31,
+      "sha256": "fcca53e8f5d5b954c542f32fa627249f148b7932f80beebbec628c9fad565cf9"
     },
     {
       "name": "Red Apple",
@@ -2961,6 +3127,17 @@
       "width": 24,
       "height": 22,
       "sha256": "5cc1759bb2be2f68cc55b30e214b7552fe68b8f943bc2f459e498a64f56573fd"
+    },
+    {
+      "name": "Scythe",
+      "slug": "scythe",
+      "source_page": "https://primibia.com/wiki/items/scythe",
+      "source_image": "https://primibia.com/wiki-sprites/items/scythe.png",
+      "local_path": "/assets/items/scythe.png",
+      "bytes": 262,
+      "width": 22,
+      "height": 27,
+      "sha256": "94721d7930a57eed6c4ddc992ee1703cfb19c847f23d055d974f28affc25c174"
     },
     {
       "name": "Sentinel Shield",
@@ -3667,6 +3844,17 @@
       "sha256": "5c78a1f5962d720ab3396b1ecc236e43e2afad96c4f80861596653ad920add5c"
     },
     {
+      "name": "Twin Axe",
+      "slug": "twin-axe",
+      "source_page": "https://primibia.com/wiki/items/twin-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/twin-axe.png",
+      "local_path": "/assets/items/twin-axe.png",
+      "bytes": 899,
+      "width": 31,
+      "height": 32,
+      "sha256": "1393c2787ec2883226acc8d47d33a5554fe4025f348eb4f2a14572b30724c301"
+    },
+    {
       "name": "Two Handed Sword",
       "slug": "two-handed-sword",
       "source_page": "https://primibia.com/wiki/items/two-handed-sword",
@@ -3775,6 +3963,17 @@
       "width": 31,
       "height": 32,
       "sha256": "6375210985ea3cb1808a1ee32f8b711bcd038add3381adf1d92ddabc3a3ee859"
+    },
+    {
+      "name": "War Axe",
+      "slug": "war-axe",
+      "source_page": "https://primibia.com/wiki/items/war-axe",
+      "source_image": "https://primibia.com/wiki-sprites/items/war-axe.png",
+      "local_path": "/assets/items/war-axe.png",
+      "bytes": 1038,
+      "width": 32,
+      "height": 32,
+      "sha256": "447467e7654434dd87b62bc1fedb53de4884804e71e98d4d5dba511d374b7228"
     },
     {
       "name": "War Hammer",

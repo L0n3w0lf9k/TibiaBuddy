@@ -2,6 +2,7 @@ import Dexie, { type Table } from 'dexie';
 import type { AppState } from './types';
 import { makeSeed } from './seed';
 import { validateBackup } from './domain/backupValidation';
+import { upgradeJournal } from './domain/migrations';
 export { validateBackup } from './domain/backupValidation';
 
 class BuddyDatabase extends Dexie {
@@ -18,21 +19,26 @@ channel?.addEventListener('message', () => { void readState().then(state => list
 export async function readState(): Promise<AppState> {
   return db.transaction('rw', db.snapshots, async () => {
     const current = await db.snapshots.get('current');
-    if (current) return current.data;
+    if (current) {
+      const upgraded = upgradeJournal(current.data);
+      if (upgraded.changed) { upgraded.state.revision++; await db.snapshots.put({ id: 'current', data: upgraded.state }); }
+      return upgraded.state;
+    }
     const data = makeSeed(); await db.snapshots.put({ id: 'current', data }); return data;
   });
 }
 export async function mutateState(recipe: (draft: AppState) => void) {
   const next = await db.transaction('rw', db.snapshots, async () => {
     const current = (await db.snapshots.get('current'))?.data ?? makeSeed();
-    const draft = structuredClone(current); recipe(draft); draft.revision = current.revision + 1;
+    const draft = structuredClone(upgradeJournal(current).state); recipe(draft); draft.revision = current.revision + 1;
     await db.snapshots.put({ id: 'current', data: draft }); return draft;
   });
   publish(next);
 }
 export async function replaceState(data: AppState) {
   validateBackup(data);
-  await mutateState(draft => { const revision = draft.revision; Object.assign(draft, data, { revision }); });
+  const restored = upgradeJournal(data).state;
+  await mutateState(draft => { const revision = draft.revision; Object.assign(draft, restored, { revision }); });
 }
 export function downloadBackup(state: AppState) {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });

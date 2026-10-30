@@ -6891,7 +6891,7 @@ const rawSpells: Omit<SpellRecord,'sourceIds'|'evidence'>[] = [
    "druid"
   ],
   "level": 24,
-  "mana": 400,
+  "mana": 420,
   "runeCharges": 1,
   "soulCost": 3,
   "useLevel": null,
@@ -6900,7 +6900,7 @@ const rawSpells: Omit<SpellRecord,'sourceIds'|'evidence'>[] = [
   "promotion": false,
   "price": 1500,
   "teachers": [],
-  "notes": [],
+  "notes": ["The app uses a 420-mana UH preset. Edit the rune settings for your server."],
   "sourceUrl": "https://primibia.com/wiki/spells/ultimate-healing-rune"
  },
  {
@@ -6981,7 +6981,7 @@ export const spells: SpellRecord[] = rawSpells.map(s => {
  // The contemporary dialogue establishes only these four tower allocations.
  // Do not attach that evidence to inferred Eremo/promotion assignments.
  const teachers = s.teachers.filter(id => ['puffels','ursula','gundralph','zoltan'].includes(id));
- return {...s,teachers,sourceIds:['primibia',...(teachers.length ? ['edron-2005'] : [])],evidence:{...evidenceFor(s as unknown as Record<string,unknown>,s.sourceUrl,['vocations','level','mana','runeCharges','soulCost','useLevel','useMagicLevel','premium','promotion','price']),teachers:{status:teachers.length?'period-observation':'unknown',url:teachers.length?'https://forum.tibia.pl/showthread.php?t=22662':null},...(s.vocations===null?{vocations:{status:'disputed' as EvidenceStatus,url:s.sourceUrl,note:'The reference parser does not resolve promotion-specific permissions.'}}:{})}};
+ return {...s,teachers,sourceIds:['primibia',...(teachers.length ? ['edron-2005'] : [])],evidence:{...evidenceFor(s as unknown as Record<string,unknown>,s.sourceUrl,['vocations','level','mana','runeCharges','soulCost','useLevel','useMagicLevel','premium','promotion','price']),teachers:{status:teachers.length?'period-observation':'unknown',url:teachers.length?'https://forum.tibia.pl/showthread.php?t=22662':null},...(s.id==='ultimate-healing-rune'?{mana:{status:'disputed' as EvidenceStatus,url:s.sourceUrl,note:'The app uses a 420-mana UH preset; the linked reconstruction lists 400. Server-specific values can be edited.'}}:{}),...(s.vocations===null?{vocations:{status:'disputed' as EvidenceStatus,url:s.sourceUrl,note:'The reference parser does not resolve promotion-specific permissions.'}}:{})}};
 });
 
 export const spellTeachers: SpellTeacher[] = [

@@ -71,6 +71,14 @@ export function magicPlan(input: {
 }
 
 export interface FoodRecord { id: string; name: string; seconds: number; weight: number }
+export const FOOD_SOURCES = [
+  { title: 'Early food durations and weights', url: SOURCES.food,
+    note: 'The period guide lists nourishment in seconds and item weight. Foods marked uncertain in that guide are omitted from the added comparison choices.' },
+  { title: 'Tibia Legacy 7.72 food table', url: 'https://github.com/peonso/tibialegacyserver/blob/master/server/data/actions/lib/actions.lua',
+    note: 'A version-labeled reconstruction corroborates the duration values, including dragon ham at 720 seconds. These are nourishment durations, not amounts of mana.' },
+  { title: 'Classic item weights', url: 'https://primibia.com/wiki/items',
+    note: 'Primibia provides a 7.72 reconstruction cross-check for weights. Its displayed raw nutrition units are not imported as seconds.' },
+];
 export const FOODS: FoodRecord[] = [
   { id: 'white-mushroom', name: 'White mushroom', seconds: 108, weight: 0.4 },
   { id: 'brown-mushroom', name: 'Brown mushroom', seconds: 264, weight: 0.2 },
@@ -80,16 +88,38 @@ export const FOODS: FoodRecord[] = [
   { id: 'dragon-ham', name: 'Dragon ham', seconds: 720, weight: 30 },
   { id: 'meat', name: 'Meat', seconds: 180, weight: 13 },
   { id: 'egg', name: 'Egg', seconds: 72, weight: 0.3 },
+  { id: 'orange', name: 'Orange', seconds: 156, weight: 1.1 },
+  { id: 'cookie', name: 'Cookie', seconds: 24, weight: 0.1 },
+  { id: 'strawberry', name: 'Strawberry', seconds: 24, weight: 0.2 },
+  { id: 'blueberry', name: 'Blueberry', seconds: 12, weight: 0.2 },
+  { id: 'cherry', name: 'Cherry', seconds: 12, weight: 0.2 },
+  { id: 'pear', name: 'Pear', seconds: 60, weight: 1.4 },
+  { id: 'red-apple', name: 'Red apple', seconds: 72, weight: 1.5 },
+  { id: 'tomato', name: 'Tomato', seconds: 72, weight: 1 },
+  { id: 'brown-bread', name: 'Brown bread', seconds: 96, weight: 4 },
+  { id: 'salmon', name: 'Salmon', seconds: 120, weight: 3.2 },
+  { id: 'cheese', name: 'Cheese', seconds: 108, weight: 4 },
+  { id: 'corncob', name: 'Corncob', seconds: 108, weight: 3.5 },
+  { id: 'grapes', name: 'Grapes', seconds: 108, weight: 2.5 },
+  { id: 'coconut', name: 'Coconut', seconds: 216, weight: 4.8 },
+  { id: 'melon', name: 'Melon', seconds: 240, weight: 9.5 },
 ];
 export const FOOD_CAP_SECONDS = 1200;
 
 export function foodPlan(food: FoodRecord, hours: number, alreadyFedSeconds = 0, unitPrice: number | null = null) {
-  if (!nonnegative(hours) || !positive(food.seconds) || !nonnegative(food.weight) ||
+  if (!nonnegative(hours)) return null;
+  return foodPlanSeconds(food, hours * 3600, alreadyFedSeconds, unitPrice);
+}
+
+/** Direct-seconds entry point avoids a round trip through hours for recovery goals. */
+export function foodPlanSeconds(food: FoodRecord, totalSeconds: number, alreadyFedSeconds = 0, unitPrice: number | null = null) {
+  if (!nonnegative(totalSeconds) || !positive(food.seconds) || !nonnegative(food.weight) ||
     !nonnegative(alreadyFedSeconds) || alreadyFedSeconds > FOOD_CAP_SECONDS ||
     (unitPrice !== null && !nonnegative(unitPrice))) return null;
-  const requiredSeconds = Math.max(0, hours * 3600 - alreadyFedSeconds);
+  const requiredSeconds = Math.max(0, totalSeconds - alreadyFedSeconds);
   const quantity = Math.ceil(requiredSeconds / food.seconds);
-  const fillNow = Math.floor((FOOD_CAP_SECONDS - alreadyFedSeconds) / food.seconds);
+  if (!Number.isSafeInteger(quantity) || !finite(quantity * food.weight) || !finite(quantity * food.seconds)) return null;
+  const fillNow = Math.min(quantity, Math.floor((FOOD_CAP_SECONDS - alreadyFedSeconds) / food.seconds));
   return { quantity, requiredSeconds, suppliedSeconds: alreadyFedSeconds + quantity * food.seconds,
     weight: quantity * food.weight, cost: unitPrice === null ? null : quantity * unitPrice,
     fillNow, fedAfterFillingSeconds: alreadyFedSeconds + fillNow * food.seconds };
@@ -107,7 +137,7 @@ export interface RuneRecipe {
 }
 /** Costs/charges are source-tagged candidates, with soul intentionally unknown until supplied. */
 export const RUNE_RECIPES: RuneRecipe[] = [
-  { id: 'uh', name: 'Ultimate healing', words: 'adura vita', mana: 400, level: 24, charges: 1, vocations: ['druid'], soul: null },
+  { id: 'uh', name: 'Ultimate healing', words: 'adura vita', mana: 420, level: 24, charges: 1, vocations: ['druid'], soul: null },
   { id: 'hmm', name: 'Heavy magic missile', words: 'adori gran', mana: 280, level: 25, charges: 5, vocations: ['sorcerer', 'druid', 'paladin'], soul: null },
   { id: 'gfb', name: 'Great fireball', words: 'adori gran flam', mana: 480, level: 23, charges: 2, vocations: ['sorcerer', 'druid'], soul: null },
   { id: 'ih', name: 'Intense healing', words: 'adura gran', mana: 240, level: 15, charges: 1, vocations: ['druid'], soul: null },
@@ -120,17 +150,20 @@ export function runePlan(input: {
   soulPerCast: number | null; currentSoul: number; manaPerSecond: number;
 }) {
   const { objects, manaPerCast, chargesPerObject, currentMana, maximumMana, blankRunes, soulPerCast, currentSoul, manaPerSecond } = input;
-  if (!whole(objects) || !positive(manaPerCast) || !whole(chargesPerObject) || chargesPerObject === 0 ||
-    !nonnegative(currentMana) || !positive(maximumMana) || currentMana > maximumMana ||
+  if (!whole(objects) || !whole(manaPerCast) || !whole(chargesPerObject) || chargesPerObject === 0 ||
+    !nonnegative(currentMana) || !nonnegative(maximumMana) || currentMana > maximumMana ||
     !whole(blankRunes) || !nonnegative(currentSoul) || !positive(manaPerSecond) ||
-    (soulPerCast !== null && (!whole(soulPerCast) || soulPerCast === 0))) return null;
+    (soulPerCast !== null && !whole(soulPerCast))) return null;
   const mana = objects * manaPerCast;
   const soulNeeded = soulPerCast === null ? null : objects * soulPerCast;
+  if (![objects, manaPerCast, chargesPerObject, blankRunes, mana, objects * chargesPerObject].every(Number.isSafeInteger) ||
+    (soulNeeded !== null && !Number.isSafeInteger(soulNeeded))) return null;
   const needsSoul = soulNeeded === null ? null : Math.max(0, soulNeeded - currentSoul);
   const capacityFits = maximumMana >= manaPerCast;
   return { casts: objects, objects, charges: objects * chargesPerObject, mana,
     blankShortfall: Math.max(0, objects - blankRunes), soulNeeded, soulShortfall: needsSoul,
-    availableSoulCasts: soulPerCast === null ? null : Math.floor(currentSoul / soulPerCast),
+    availableSoulCasts: soulPerCast === null || soulPerCast === 0 ? null : Math.floor(currentSoul / soulPerCast),
+    soulLimited: soulPerCast === null ? null : soulPerCast > 0,
     capacityFits,
     regenerationSeconds: capacityFits ? Math.max(0, mana - currentMana) / manaPerSecond : null,
     // This is a material check, never a claim that the character knows/is allowed to cast a spell.

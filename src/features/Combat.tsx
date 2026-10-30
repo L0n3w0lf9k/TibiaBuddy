@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Crosshair, Heart, Shield, Sparkles, Swords } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Crosshair, Heart, RotateCcw, Shield, Sparkles, Swords } from 'lucide-react';
 import { useApp } from '../context';
-import { Badge, Evidence, External, Field, Notice, PageHeader, Stat, Tabs, gp, number } from '../shared';
-import { spells } from '../data/game';
+import { Badge, Evidence, External, Field, Notice, PageHeader, SearchBox, Stat, Tabs, gp, number } from '../shared';
+import type { Character } from '../types';
+import ItemSprite from '../components/ItemSprite';
+import SpellSprite from '../components/SpellSprite';
+import { COMBAT_SKILLS, characterSkill } from '../domain/characterSkills';
+import { effectiveSpells, spellOverrideKey } from '../domain/spellCatalog';
+import { combatSpellRange, meleeOverview, spellOverviewGroups, spellReference, spellRequirementCheck, WEAPON_REFERENCE, type CombatSkillInputs, type CombatSpellRow, type MeleeOverviewRow } from '../domain/combatOverview';
+import './combat-updates.css';
 import { SOURCES, SPELL_MODELS, characterStats, meleePeak, rangedScenario, spellRange } from '../domain/mechanics';
 
 function Numeric({ value, onChange, min = 0, max, step = 1 }: {
@@ -13,43 +19,26 @@ function Numeric({ value, onChange, min = 0, max, step = 1 }: {
 }
 const rangeLabel = (range: ReturnType<typeof spellRange>) => range ? `${number(range.min)}–${number(range.max)}` : '—';
 
-function SpellCalculator({ level, magicLevel }: { level: number; magicLevel: number }) {
-  const { character } = useApp();
-  const [selected, setSelected] = useState(character.vocation === 'knight' ? 'uh' : 'hmm');
+function SpellCalculator({ level, magicLevel, initialSelection }: { level: number; magicLevel: number; initialSelection?: string }) {
+  const { character, state, server } = useApp();
+  const references = effectiveSpells(state, server.id);
+  const [selected, setSelected] = useState(initialSelection || (character.vocation === 'knight' ? 'uh' : 'hmm'));
   const [filter, setFilter] = useState('all');
   const [comparisonLevel, setComparisonLevel] = useState(level);
   const [comparisonML, setComparisonML] = useState(magicLevel + 5);
   const [missingHP, setMissingHP] = useState<number | null>(null);
   const model = SPELL_MODELS.find(item => item.id === selected)!;
-  const shown = SPELL_MODELS.filter(item => filter === 'all' || item.category === filter);
-  const current = spellRange(model, level, magicLevel);
-  const comparison = spellRange(model, comparisonLevel, comparisonML);
-  const reference = spells.find(item => item.words.trim().toLowerCase() === model.words) ??
-    (model.id === 'heal-friend' ? spells.find(item => item.words.toLowerCase().startsWith('exura sio')) : undefined);
-  const failed: string[] = [];
-  const unchecked: string[] = [];
-  if (!reference) unchecked.push('This action’s complete use requirements are not yet in the reference.');
-  else if (model.type === 'rune') {
-    // Creation vocation, creation level and creation mana must not gate use of an existing rune.
-    if (reference.useMagicLevel === null) unchecked.push('Rune-use magic-level requirement is not confirmed.');
-    else if (magicLevel < reference.useMagicLevel) failed.push(`Requires magic level ${reference.useMagicLevel} to use this rune.`);
-    if (reference.useLevel === null) unchecked.push('The historical rune-use character-level rule still needs confirmation.');
-    else if (level < reference.useLevel) failed.push(`Requires character level ${reference.useLevel} to use this rune.`);
-  } else {
-    if (!reference.vocations || character.vocation === 'unselected') unchecked.push('Select a character vocation to check the vocation requirement.');
-    else if (!reference.vocations.includes(character.vocation)) failed.push('This spell is outside the selected vocation’s reference list.');
-    if (reference.level === null) unchecked.push('Required character level is not confirmed.');
-    else if (level < reference.level) failed.push(`Requires character level ${reference.level}.`);
-    if (reference.premium === true && !character.premium) failed.push('The reference requires a premium account.');
-    if (reference.promotion === true && !character.promoted) failed.push('The reference requires promotion.');
-    if (reference.premium === null || reference.promotion === null) unchecked.push('Some access requirements are not confirmed.');
-  }
+  const shown = SPELL_MODELS.filter(item => filter === 'all' || item.category === filter).sort((a, b) => (spellReference(a, references)?.name ?? a.name).localeCompare(spellReference(b, references)?.name ?? b.name));
+  const current = combatSpellRange(model, level, magicLevel);
+  const comparison = combatSpellRange(model, comparisonLevel, comparisonML);
+  const reference = spellReference(model, references);
+  const { failures: failed, unchecked } = spellRequirementCheck(model, reference, character, level, magicLevel);
   const validMissingHP = missingHP !== null && Number.isFinite(missingHP) && missingHP >= 0;
   function changeFilter(value: string) {
     setFilter(value);
     if (value !== 'all' && model.category !== value) setSelected(SPELL_MODELS.find(item => item.category === value)!.id);
   }
-  const requirementTitle = failed.length ? 'Requirements not met' : unchecked.length ? 'Partial requirement check' : 'Reference requirements met';
+  const requirementTitle = failed.length ? 'Requirements not met' : unchecked.length ? 'Partial requirement check' : 'Listed requirements met';
   return <>
     <section className="card">
       <div className="toolbar"><h2>Choose an action</h2><Badge tone="blue">Historical estimate</Badge></div>
@@ -79,7 +68,7 @@ function SpellCalculator({ level, magicLevel }: { level: number; magicLevel: num
         {reference && <details className="evidence"><summary>Reference requirements</summary><div>
           {model.type === 'rune' ? <>
             <p>Rune use: ML {reference.useMagicLevel ?? 'unknown'}; character level {reference.useLevel ?? 'not confirmed'}.</p>
-            <p>Creating the rune is a separate action: level {reference.level ?? 'unknown'}, {reference.mana ?? 'unknown'} mana, {reference.soulCost ?? 'unknown'} soul.</p>
+            <p>Creating the rune is a separate action: level {reference.level ?? 'unknown'}, {reference.mana ?? 'unknown'} mana, {reference.soulCost ?? 'unknown'} soul and {reference.runeCharges ?? 'unknown'} charges per rune item.</p><p>Creation vocations: {reference.vocations === null ? 'Not confirmed' : reference.vocations.length ? reference.vocations.join(', ') : 'None listed'}. These creation conditions do not restrict the use preview above.</p>
           </> : <p>Level {reference.level ?? 'unknown'} · {reference.mana ?? 'unknown'} mana · {reference.premium === null ? 'Premium rule unknown' : reference.premium ? 'Premium' : 'No premium requirement listed'}.</p>}
           <p>Requirements use a labelled 7.72 reconstruction. Meeting the listed conditions is not historical certification.</p>
         </div></details>}
@@ -101,7 +90,7 @@ function SpellCalculator({ level, magicLevel }: { level: number; magicLevel: num
     <section className="card">
       <h2>Compare actions at these inputs</h2>
       <div style={{ overflowX: 'auto' }}><table className="data-table"><thead><tr><th>Action</th><th>Type</th><th>Element</th><th>Raw range</th><th></th></tr></thead><tbody>
-        {shown.map(item => <tr key={item.id}><td><strong>{item.name}</strong></td><td>{item.type === 'rune' ? 'Rune' : 'Instant'}</td><td>{item.element}</td><td>{rangeLabel(spellRange(item, level, magicLevel))}</td><td><button className="btn" disabled={item.id === selected} onClick={() => setSelected(item.id)}>{item.id === selected ? 'Selected' : 'Inspect'}</button></td></tr>)}
+        {shown.map(item => <tr key={item.id}><td><strong>{item.name}</strong></td><td>{item.type === 'rune' ? 'Rune' : 'Instant'}</td><td>{item.element}</td><td>{rangeLabel(combatSpellRange(item, level, magicLevel))}</td><td><button className="btn" disabled={item.id === selected} onClick={() => setSelected(item.id)}>{item.id === selected ? 'Selected' : 'Inspect'}</button></td></tr>)}
       </tbody></table></div>
     </section>
     <Evidence>
@@ -112,35 +101,36 @@ function SpellCalculator({ level, magicLevel }: { level: number; magicLevel: num
   </>;
 }
 
-function WeaponCalculator() {
-  const { character, state } = useApp();
-  const [kind, setKind] = useState(character.vocation === 'paladin' ? 'distance' : 'melee');
-  const [skill, setSkill] = useState(character.meleeSkill);
-  const [attack, setAttack] = useState(30);
+function WeaponCalculator({ skills, initialWeapon, initialKind }: { skills: CombatSkillInputs; initialWeapon?: MeleeOverviewRow; initialKind?: string }) {
+  const { character, state, server } = useApp();
+  const [kind, setKind] = useState(initialWeapon ? 'melee' : initialKind || (character.vocation === 'paladin' ? 'distance' : 'melee'));
+  const [weaponSkill, setWeaponSkill] = useState<'axe' | 'sword' | 'club'>(initialWeapon?.skill || 'sword');
+  const [skill, setSkill] = useState(initialWeapon?.inputSkill ?? skills.sword);
+  const [attack, setAttack] = useState(initialWeapon ? initialWeapon.attack ?? NaN : 30);
   const [otherAttack, setOtherAttack] = useState(35);
-  const [otherSkill, setOtherSkill] = useState(character.meleeSkill);
+  const [otherSkill, setOtherSkill] = useState(initialWeapon?.inputSkill ?? skills.sword);
   const [observedMin, setObservedMin] = useState(30);
   const [observedMax, setObservedMax] = useState(60);
   const [hitPercent, setHitPercent] = useState(75);
   const [attackSeconds, setAttackSeconds] = useState(2);
   const [cost, setCost] = useState(2);
-  const peak = meleePeak(skill, attack);
-  const otherPeak = meleePeak(otherSkill, otherAttack);
+  const peak = Number.isInteger(skill) && skill >= 0 && skill <= 300 && attack > 0 && attack <= 1000 ? meleePeak(skill, attack) : null;
+  const otherPeak = Number.isInteger(otherSkill) && otherSkill >= 0 && otherSkill <= 300 && otherAttack > 0 && otherAttack <= 1000 ? meleePeak(otherSkill, otherAttack) : null;
   const scenario = rangedScenario(observedMin, observedMax, hitPercent, attackSeconds, cost);
-  const weapons = state.items.filter(item => item.attack !== null && item.attack !== undefined && item.attack > 0);
+  const weapons = meleeOverview(state, server.id, skills).filter(item => item.attack !== null && item.attack > 0);
   return <>
     <section className="card">
       <h2>Weapon planning</h2>
       <Tabs value={kind} onChange={setKind} tabs={[{ id: 'melee', label: 'Melee peak estimate' }, { id: 'distance', label: 'Distance scenario' }, { id: 'wand', label: 'Wand / rod scenario' }]} />
       {kind === 'melee' ? <>
         <p className="muted">Full-attack raw maximum from the legacy weapon model. Armor, shielding, misses and attack timing are excluded.</p>
-        {weapons.length > 0 && <Field label="Use a catalog attack value"><select defaultValue="" onChange={e => { const item = weapons.find(w => w.id === e.target.value); if (item?.attack) setAttack(item.attack); }}><option value="" disabled>Choose a weapon</option>{weapons.map(item => <option key={item.id} value={item.id}>{item.name} · Atk {item.attack}</option>)}</select></Field>}
+        {weapons.length > 0 && <Field label="Use a sourced weapon attack value"><select defaultValue={initialWeapon?.id || ''} onChange={e => { const item = weapons.find(w => w.id === e.target.value); if (item?.attack) { setAttack(item.attack); setWeaponSkill(item.skill); setSkill(item.inputSkill); } }}><option value="" disabled>Choose a weapon</option>{weapons.map(item => <option key={item.id} value={item.id}>{item.name} · Atk {item.attack}</option>)}</select></Field>}
         <div className="grid-2">
-          <div className="panel"><h3>Current setup</h3><div className="form-grid">
-            <Field label="Melee skill"><Numeric value={skill} onChange={setSkill} max={300} /></Field>
+          <div className="combat-weapon-setup"><h3>Current setup</h3><div className="form-grid">
+            <Field label="Weapon skill"><select value={weaponSkill} onChange={e => { const selected = e.target.value as 'axe' | 'sword' | 'club'; setWeaponSkill(selected); setSkill(skills[selected]); }}><option value="axe">Axe fighting</option><option value="sword">Sword fighting</option><option value="club">Club fighting</option></select></Field><Field label={`${weaponSkill[0].toUpperCase() + weaponSkill.slice(1)} skill`}><Numeric value={skill} onChange={setSkill} max={300} /></Field>
             <Field label="Weapon attack"><Numeric value={attack} onChange={setAttack} min={1} max={1000} /></Field>
           </div><Stat label="Estimated raw maximum" value={peak === null ? '—' : number(peak)} icon={<Swords size={17} />} /></div>
-          <div className="panel"><h3>Compare a setup</h3><div className="form-grid">
+          <div className="combat-weapon-setup"><h3>Compare a setup</h3><div className="form-grid">
             <Field label="Comparison melee skill"><Numeric value={otherSkill} onChange={setOtherSkill} max={300} /></Field>
             <Field label="Comparison weapon attack"><Numeric value={otherAttack} onChange={setOtherAttack} min={1} max={1000} /></Field>
           </div><Stat label="Comparison raw maximum" value={otherPeak === null ? '—' : number(otherPeak)} detail={peak !== null && otherPeak !== null ? `${otherPeak - peak >= 0 ? '+' : ''}${number(otherPeak - peak)} maximum damage` : 'Enter valid values'} /></div>
@@ -170,29 +160,157 @@ function WeaponCalculator() {
   </>;
 }
 
+function SpellResultRow({ row, level, magicLevel, onInspect }: {
+  row: CombatSpellRow; level: number; magicLevel: number; onInspect: (id: string) => void;
+}) {
+  const { character, state, server } = useApp();
+  const requirement = spellRequirementCheck(row.model, row.reference, character, level, magicLevel);
+  const edited = row.reference && Boolean(state.spellOverrides?.[spellOverrideKey(server.id, row.reference.id)]);
+  const rune = row.model.type === 'rune';
+  return <tr>
+    <td><div className="combat-action">
+      <SpellSprite spell={row.reference} name={row.name} words={row.model.words} size={32} />
+      <div><strong>{row.name}</strong><span className="combat-incantation">{rune ? row.model.element : row.reference?.words ?? row.model.words}</span>
+        <button className="combat-inspect" onClick={() => onInspect(row.id)}>Inspect & compare <ArrowUpRight size={12} /></button>
+      </div>
+    </div></td>
+    <td><strong className="combat-result">{rangeLabel(row.range)}</strong><span className="combat-result-unit">{row.model.category === 'healing' ? 'HP restored' : row.model.element + ' damage'}{rune ? ' / use' : ''}</span></td>
+    <td>{rune ? <>
+      <strong>ML {row.reference?.useMagicLevel ?? '?'}</strong>
+      <span className="combat-incantation">{row.reference?.useLevel == null ? 'Use level unconfirmed' : `Use level ${row.reference.useLevel}`}</span>
+    </> : <>
+      <strong>{row.reference?.mana == null ? 'Unknown' : number(row.reference.mana)}{row.reference?.mana == null ? '' : ' mana'}</strong>
+      <span className="combat-incantation">Level {row.reference?.level ?? '?'}</span>
+    </>}
+      <span className="combat-requirement" title={[...requirement.failures, ...requirement.unchecked].join(' ')}>
+        <Badge tone={requirement.status === 'blocked' ? 'warning' : requirement.status === 'listed' ? 'success' : 'muted'}>{requirement.title}</Badge>
+      </span>
+      {edited && <span className="combat-incantation">Server edit</span>}
+    </td>
+  </tr>;
+}
+
+function CombatOverview({ level, magicLevel, skills, onSpellInspect, onWeaponInspect, onScenario }: {
+  level: number; magicLevel: number; skills: CombatSkillInputs;
+  onSpellInspect: (id: string) => void; onWeaponInspect: (weapon: MeleeOverviewRow) => void; onScenario: () => void;
+}) {
+  const { state, server } = useApp();
+  const [query, setQuery] = useState(''), [weaponType, setWeaponType] = useState('all');
+  const groups = spellOverviewGroups(level, magicLevel, effectiveSpells(state, server.id));
+  const weapons = meleeOverview(state, server.id, skills);
+  const shownWeapons = weapons.filter(weapon => (weaponType === 'all' || weapon.skill === weaponType)
+    && weapon.name.toLowerCase().includes(query.toLowerCase().trim()));
+  const jump = (id: string) => document.getElementById('combat-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  return <div className="combat-overview">
+    <Notice><strong>Raw comparison model.</strong> All 21 Legacy spell and rune outputs are shown together. These ranges and the weapon maxima exclude armor, shielding, immunities, PvP reduction and missed attacks. The source calculator is branded 7.4; its formulas remain a labelled comparison model for this 7.7 companion.</Notice>
+    <nav className="combat-jump-links" aria-label="Combat result groups">
+      <button className="btn btn-secondary" onClick={() => jump('melee')}>Melee · {weapons.length}</button>
+      {groups.map(group => <button key={group.id} className="btn btn-secondary" onClick={() => jump(group.id)}>{group.title} · {group.rows.length}</button>)}
+    </nav>
+
+    <section className="panel combat-section" id="combat-melee">
+      <div className="combat-section-heading"><div><h2><Swords size={19} />Melee</h2><p>Every sourced axe, sword and club weapon, using its matching skill above. Sorted alphabetically.</p></div><Badge>{weapons.length} weapons</Badge></div>
+      <div className="combat-weapon-controls">
+        <SearchBox value={query} onChange={setQuery} placeholder="Find a weapon…" />
+        <select aria-label="Weapon skill filter" value={weaponType} onChange={event => setWeaponType(event.target.value)}>
+          <option value="all">All melee weapons</option><option value="axe">Axes</option><option value="sword">Swords</option><option value="club">Clubs</option>
+        </select>
+        {(query || weaponType !== 'all') && <button className="btn btn-ghost" onClick={() => { setQuery(''); setWeaponType('all'); }}>Show all</button>}
+      </div>
+      <div className="combat-weapon-scroll">
+        <table className="data-table"><thead><tr><th>Weapon</th><th>Matching skill</th><th>Attack</th><th>Raw maximum</th><th>Reference</th><th /></tr></thead>
+          <tbody>{shownWeapons.map(weapon => <tr key={weapon.id}>
+            <td><div className="combat-action"><ItemSprite itemId={weapon.catalogItemId || weapon.id} name={weapon.name} /><strong>{weapon.name}</strong></div></td>
+            <td>{weapon.skill[0].toUpperCase() + weapon.skill.slice(1)} <strong>{number(weapon.inputSkill)}</strong></td>
+            <td>{weapon.attack == null ? <span className="muted">Unknown</span> : number(weapon.attack)}{weapon.attackSource !== 'reference' && <span className="combat-incantation">{weapon.attackSource === 'override' ? 'Server edit' : 'Catalog value'}</span>}</td>
+            <td><strong className="combat-result">{weapon.rawMaximum == null ? '—' : number(weapon.rawMaximum)}</strong><span className="combat-result-unit">Full attack</span></td>
+            <td><External href={weapon.sourceUrl}>7.72 reference</External></td>
+            <td><button className="combat-inspect" onClick={() => onWeaponInspect(weapon)}>Compare <ArrowUpRight size={13} /></button></td>
+          </tr>)}</tbody>
+        </table>
+        {!shownWeapons.length && <p className="combat-table-footer">No weapons match. Clear the search or choose another weapon class.</p>}
+      </div>
+      <p className="combat-table-footer">{shownWeapons.length} of {weapons.length} weapons · Scroll the table for the full list. A maximum is a ceiling in this formula, not an average hit. Weapon attack and class come from Primibia’s 7.72 reconstruction; matching server catalog edits take priority. The list does not assert that every weapon is obtainable.</p>
+    </section>
+
+    <div className="combat-spell-grid">
+      {groups.map(group => <section key={group.id} className="panel combat-section" id={'combat-' + group.id}>
+        <div className="combat-section-heading"><div><h2>{group.id.includes('healing') ? <Heart size={19} /> : <Sparkles size={19} />}{group.title}</h2><p>{group.description}</p></div><Badge>{group.rows.length} actions</Badge></div>
+        <div className="table-wrap combat-spell-table"><table className="data-table"><thead><tr><th>Action · A–Z</th><th>{group.id.includes('healing') ? 'Raw healing' : 'Raw damage'}</th><th>{group.id.startsWith('rune-') ? 'Rune use' : 'Casting reference'}</th></tr></thead>
+          <tbody>{group.rows.map(row => <SpellResultRow key={row.id} row={row} level={level} magicLevel={magicLevel} onInspect={onSpellInspect} />)}</tbody>
+        </table></div>
+        <p className="combat-table-footer">{group.id.startsWith('rune-')
+          ? 'Rune-use checks are separate from creation vocation, mana and soul. Existing rune charges are being compared here.'
+          : 'Listed checks cover known level, vocation and account requirements. Spell learning, current mana and cooldowns are not checked.'}</p>
+      </section>)}
+    </div>
+
+    <section className="combat-unmodeled">
+      <Crosshair size={22} /><div><h3>Distance, shielding and other effects</h3>
+        <p>No verified damage or hit-chance formula is applied to distance skill, fist skill, shielding, wands or rods here. Berserk, damage over time and other actions outside the 21 Legacy models have no raw range in this overview. Their absence is not a zero-damage result.</p>
+        <button className="btn btn-secondary" onClick={onScenario}>Use observed weapon hits <ArrowRight size={14} /></button>
+      </div>
+    </section>
+    <Evidence>
+      <p>Spell and rune output uses power = 2 × character level + 3 × magic level, the action’s coefficients, and its documented minimum-power rule. Melee maximum uses floor((5 × matching weapon skill + 50) × weapon attack × 1.2 / 100).</p>
+      <p>The formulas were checked against the linked calculator’s actual script. Its pre-7.6 magic-level-only casting gates are not used. Requirements come from the separate 7.72 spell reference, with your server edits applied. A displayed mathematical result is not a claim that the action can currently be cast.</p>
+      <p>The weapon table contains 84 item records with a sourced weapon class and attack attribute. No missing or explicitly cleared attack attribute is converted to zero damage. Per-weapon reference links retain the attribute provenance.</p>
+      <p><External href={SOURCES.damage}>Legacy calculator and formulas</External> · <External href={WEAPON_REFERENCE.url}>Primibia weapon properties</External> · <External href={SOURCES.historicalDamage}>2006 combat observations</External> · <External href={SOURCES.update}>Official 7.6 magic update</External></p>
+    </Evidence>
+  </div>;
+}
+
+function profileSkills(character: Character): CombatSkillInputs {
+  return Object.fromEntries(COMBAT_SKILLS.map(skill => [skill.id, characterSkill(character, skill.id)])) as CombatSkillInputs;
+}
+
+function combatTabFromHash() {
+  const tab = window.location.hash.replace(/^#\/?/, '').split('/')[1];
+  return ['overview', 'spells', 'weapons'].includes(tab) ? tab : 'overview';
+}
+
 export default function Combat() {
-  const { character, openProfile } = useApp();
-  const [tab, setTab] = useState('spells');
-  const [level, setLevel] = useState(character.level);
-  const [magicLevel, setMagicLevel] = useState(character.magicLevel);
+  const { character, openProfile, navigate } = useApp();
+  const [tab, setTab] = useState(combatTabFromHash);
+  const [level, setLevel] = useState(character.level), [magicLevel, setMagicLevel] = useState(character.magicLevel);
+  const [skills, setSkills] = useState(() => profileSkills(character));
+  const [selectedSpell, setSelectedSpell] = useState<string>();
+  const [selectedWeapon, setSelectedWeapon] = useState<MeleeOverviewRow>();
+  const [weaponKind, setWeaponKind] = useState<string>();
   useEffect(() => { setLevel(character.level); setMagicLevel(character.magicLevel); }, [character.id, character.level, character.magicLevel]);
-  const stats = characterStats(level, character.vocation);
+  useEffect(() => { setSkills(profileSkills(character)); }, [character.id, character.meleeSkill, character.axeSkill, character.swordSkill, character.clubSkill, character.fistSkill, character.distanceSkill, character.shieldingSkill]);
+  useEffect(() => {
+    const syncTab = () => setTab(combatTabFromHash());
+    window.addEventListener('hashchange', syncTab);
+    return () => window.removeEventListener('hashchange', syncTab);
+  }, []);
+  const changeTab = (selected: string) => { setTab(selected); navigate('combat/' + selected); };
+  const inspectSpell = (id: string) => { setSelectedSpell(id); changeTab('spells'); };
+  const inspectWeapon = (weapon: MeleeOverviewRow) => { setSelectedWeapon(weapon); setWeaponKind('melee'); changeTab('weapons'); };
+  const stats = Number.isInteger(level) && level >= 1 && level <= 2000 ? characterStats(level, character.vocation) : null;
+  const validInputs = Number.isInteger(level) && level >= 1 && level <= 2000 && Number.isInteger(magicLevel) && magicLevel >= 0 && magicLevel <= 200
+    && Object.values(skills).every(skill => Number.isInteger(skill) && skill >= 0 && skill <= 300);
   return <>
-    <PageHeader eyebrow="KNOW YOUR NUMBERS" title="Combat calculator" description="Explore raw damage, healing and equipment comparisons." actions={<button className="btn" onClick={openProfile}>Character profile</button>} />
+    <PageHeader eyebrow="KNOW YOUR NUMBERS" title="Combat calculator" description="All weapon, spell and rune results together, grouped and alphabetized." actions={<button className="btn" onClick={openProfile}>Character profile</button>} />
     <section className="card">
       <div className="toolbar"><h2>Character preview</h2><Badge>{character.vocation === 'unselected' ? 'Choose a vocation in your profile' : character.name}</Badge></div>
-      <div className="form-grid">
+      <div className="combat-profile-grid">
         <Field label="Character level"><Numeric value={level} onChange={setLevel} min={1} max={2000} /></Field>
         <Field label="Magic level"><Numeric value={magicLevel} onChange={setMagicLevel} max={200} /></Field>
+        {COMBAT_SKILLS.map(skill => <Field key={skill.id} label={skill.label}><Numeric value={skills[skill.id]} onChange={value => setSkills(previous => ({ ...previous, [skill.id]: value }))} max={300} /></Field>)}
       </div>
-      <div className="stat-grid">
-        <Stat label="Level-based HP" value={stats ? number(stats.hp) : '—'} icon={<Heart size={16} />} />
-        <Stat label="Level-based mana" value={stats ? number(stats.mana) : '—'} icon={<Sparkles size={16} />} />
-        <Stat label="Level-based capacity" value={stats ? number(stats.capacity) + ' oz' : '—'} icon={<Shield size={16} />} />
+      <div className="combat-profile-summary">
+        <span><Heart size={15} />Estimated HP <strong>{stats ? number(stats.hp) : '—'}</strong></span>
+        <span><Sparkles size={15} />Estimated mana <strong>{stats ? number(stats.mana) : '—'}</strong></span>
+        <span><Shield size={15} />Estimated capacity <strong>{stats ? number(stats.capacity) + ' oz' : '—'}</strong></span>
+        <button className="combat-inspect" onClick={() => { setLevel(character.level); setMagicLevel(character.magicLevel); setSkills(profileSkills(character)); }}><RotateCcw size={13} />Use profile values</button>
       </div>
-      <p className="muted">Temporary inputs leave your character unchanged. Stat estimates assume vocation selection at level 8; actual profile values may differ.</p>
+      <p className="muted">Temporary inputs leave your character unchanged. Spells use level and magic level; melee weapons use their matching axe, sword or club skill. Distance, shielding and fist values are profile context, with unsupported formulas left unavailable. HP, mana and capacity assume vocation selection at level 8.</p>
     </section>
-    <Tabs value={tab} onChange={setTab} tabs={[{ id: 'spells', label: 'Spells & runes' }, { id: 'weapons', label: 'Weapons' }]} />
-    {tab === 'spells' ? <SpellCalculator key={character.id} level={level} magicLevel={magicLevel} /> : <WeaponCalculator key={character.id} />}
+    {!validInputs && <Notice tone="warning">Use whole character levels from 1–2,000, magic levels from 0–200 and combat skills from 0–300. Invalid inputs leave the affected result unavailable.</Notice>}
+    <Tabs value={tab} onChange={changeTab} tabs={[{ id: 'overview', label: 'All results' }, { id: 'spells', label: 'Spell comparison' }, { id: 'weapons', label: 'Weapon scenarios' }]} />
+    {tab === 'overview' && <CombatOverview level={level} magicLevel={magicLevel} skills={skills} onSpellInspect={inspectSpell} onWeaponInspect={inspectWeapon} onScenario={() => { setSelectedWeapon(undefined); setWeaponKind('distance'); changeTab('weapons'); }} />}
+    {tab === 'spells' && <SpellCalculator key={character.id + (selectedSpell || '')} level={level} magicLevel={magicLevel} initialSelection={selectedSpell} />}
+    {tab === 'weapons' && <WeaponCalculator key={character.id + (selectedWeapon?.id || weaponKind || '')} skills={skills} initialWeapon={selectedWeapon} initialKind={weaponKind} />}
   </>;
 }

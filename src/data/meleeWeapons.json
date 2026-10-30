@@ -1,0 +1,765 @@
+{
+  "source": "https://primibia.com/wiki/items",
+  "version": "7.72 community reconstruction",
+  "retrievedOn": "2026-10-30",
+  "description": "Attack and weapon class read from each item’s Properties table. These are reference attributes, not a claim about item availability or certified official Tibia 7.7 values.",
+  "weapons": [
+    {
+      "id": "arcane-staff",
+      "name": "Arcane Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/arcane-staff",
+      "skill": "club",
+      "attack": 50,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "6dc7d54a4cf0fb00176a3e625563cbd4ca737588bc75e103d69976caea4ef243"
+    },
+    {
+      "id": "axe",
+      "name": "Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/axe",
+      "skill": "axe",
+      "attack": 12,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "f95193fa0dccfd4c4afb7a7b3751f7abcb6bc102e7bbc34adb295ebf56d665ee"
+    },
+    {
+      "id": "banana-staff",
+      "name": "Banana Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/banana-staff",
+      "skill": "club",
+      "attack": 25,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "794d10f5f919a581e86fce0925833bb15422b8ff9b603ec61cd55a117eed35ef"
+    },
+    {
+      "id": "barbarian-axe",
+      "name": "Barbarian Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/barbarian-axe",
+      "skill": "axe",
+      "attack": 28,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "e3974060f6ea4bf9d17157d17820289e18745e02862adb6a167695611ce528ca"
+    },
+    {
+      "id": "battle-axe",
+      "name": "Battle Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/battle-axe",
+      "skill": "axe",
+      "attack": 25,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "af478c129a08fc04c8a3ecea0d803df72f24426c18343ed501133934eefda649"
+    },
+    {
+      "id": "battle-hammer",
+      "name": "Battle Hammer",
+      "sourceUrl": "https://primibia.com/wiki/items/battle-hammer",
+      "skill": "club",
+      "attack": 24,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "61a67979288572d0cf183d2d6c1c25a7d51a67dcd3c6df97788d1089b860059f"
+    },
+    {
+      "id": "beastslayer-axe",
+      "name": "Beastslayer Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/beastslayer-axe",
+      "skill": "axe",
+      "attack": 35,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "0cf9dfc75a1e84370a98dd520e9ef2c8e20fe04b5244168af158582fd18eb2a4"
+    },
+    {
+      "id": "bone-club",
+      "name": "Bone Club",
+      "sourceUrl": "https://primibia.com/wiki/items/bone-club",
+      "skill": "club",
+      "attack": 12,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "411cfa891e504a81a49be8dec6bf202ca1c16f510cdd88568eb27ce93b8f0081"
+    },
+    {
+      "id": "bone-sword",
+      "name": "Bone Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/bone-sword",
+      "skill": "sword",
+      "attack": 14,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "782572490379900e19818f907b3034ca9abe395755378e8329b9a916bc6a7500"
+    },
+    {
+      "id": "bright-sword",
+      "name": "Bright Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/bright-sword",
+      "skill": "sword",
+      "attack": 36,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a1023b058419ab46bb857330cdd5eeef7b6922cdcbc6ecb50b8ed507b0104dae"
+    },
+    {
+      "id": "broadsword",
+      "name": "Broadsword",
+      "sourceUrl": "https://primibia.com/wiki/items/broadsword",
+      "skill": "sword",
+      "attack": 26,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "12bb4e9835c06d5ab416069b459b8ef794db76d63150fcbd7bacbd5af44a2da4"
+    },
+    {
+      "id": "carlin-sword",
+      "name": "Carlin Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/carlin-sword",
+      "skill": "sword",
+      "attack": 15,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2fbb905fac12cddd2ba12010b3ee57a34373c88cbcddcad24a1d0019df4987e4"
+    },
+    {
+      "id": "clerical-mace",
+      "name": "Clerical Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/clerical-mace",
+      "skill": "club",
+      "attack": 28,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "92a78db12009e8791d9e3f10b69f0902181828c5faee05506d4f05dd5932eb70"
+    },
+    {
+      "id": "club",
+      "name": "Club",
+      "sourceUrl": "https://primibia.com/wiki/items/club",
+      "skill": "club",
+      "attack": 7,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "43f9e4d80bc4ec9c5c94d2e172fe439787e09a3752eaf3b16d861c440aba6d54"
+    },
+    {
+      "id": "combat-knife",
+      "name": "Combat Knife",
+      "sourceUrl": "https://primibia.com/wiki/items/combat-knife",
+      "skill": "sword",
+      "attack": 8,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "3cb5e2f4bd87a51ab9a60cc9c7e321e0ccdd0074b5f0d31f8872b7e1874df872"
+    },
+    {
+      "id": "crowbar",
+      "name": "Crowbar",
+      "sourceUrl": "https://primibia.com/wiki/items/crowbar",
+      "skill": "club",
+      "attack": 6,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "14353d943d0c0742e86fbc7d1b782fe6d19766cf820d38bea84d63e6940454a1"
+    },
+    {
+      "id": "crystal-mace",
+      "name": "Crystal Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/crystal-mace",
+      "skill": "club",
+      "attack": 38,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2d9a6f4f0009ecc30eb26d437e8527af01935636b7841c0e63709f79f31adc1f"
+    },
+    {
+      "id": "dagger",
+      "name": "Dagger",
+      "sourceUrl": "https://primibia.com/wiki/items/dagger",
+      "skill": "sword",
+      "attack": 8,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "af431589bdf023dafdd6a95d8fd854c94b327657c5269df2b3c33956b3cb1d55"
+    },
+    {
+      "id": "daramanian-axe",
+      "name": "Daramanian Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/daramanian-axe",
+      "skill": "axe",
+      "attack": 16,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "87fe454313e95fcdc364dcf17fec9b86e30a4139913245736105b20c87b7837c"
+    },
+    {
+      "id": "daramanian-mace",
+      "name": "Daramanian Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/daramanian-mace",
+      "skill": "club",
+      "attack": 21,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "704ab78cadaea440c57c13e56848f0defe3c6dc319b35db6fb7818ada95b00b1"
+    },
+    {
+      "id": "daramanian-waraxe",
+      "name": "Daramanian Waraxe",
+      "sourceUrl": "https://primibia.com/wiki/items/daramanian-waraxe",
+      "skill": "axe",
+      "attack": 39,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "0b51b1dfd602c5eb2933c8bf9cd1cf2779fca8414e1d7238248fdc9280c8be48"
+    },
+    {
+      "id": "djinn-blade",
+      "name": "Djinn Blade",
+      "sourceUrl": "https://primibia.com/wiki/items/djinn-blade",
+      "skill": "sword",
+      "attack": 38,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "1603bb005c9f318707ce12aecb2d3d939becff1e5ab6be0bef194acaf30f812e"
+    },
+    {
+      "id": "double-axe",
+      "name": "Double Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/double-axe",
+      "skill": "axe",
+      "attack": 35,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "91624c077827ed67a0082b34e623477b1a106abc9cbb0a24d79b9e988aea89f6"
+    },
+    {
+      "id": "dragon-hammer",
+      "name": "Dragon Hammer",
+      "sourceUrl": "https://primibia.com/wiki/items/dragon-hammer",
+      "skill": "club",
+      "attack": 32,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a3868cc525ceb42766211ac84232e2334d03a8a23aacfa410d9222d78f34285a"
+    },
+    {
+      "id": "dragon-lance",
+      "name": "Dragon Lance",
+      "sourceUrl": "https://primibia.com/wiki/items/dragon-lance",
+      "skill": "axe",
+      "attack": 47,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "c79a741b4dc31367744761e68d382fce7ad2fecbfef150f83cca30db9716fd7f"
+    },
+    {
+      "id": "dwarven-axe",
+      "name": "Dwarven Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/dwarven-axe",
+      "skill": "axe",
+      "attack": 31,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "6c15e95c4d71f133b28624642cd7010ab0dfb5b3e8115348427725b89ec409d2"
+    },
+    {
+      "id": "enchanted-staff",
+      "name": "Enchanted Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/enchanted-staff",
+      "skill": "club",
+      "attack": 39,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "8192ac161883662b6128815f2deb9a49c7c0ee213725aaa672c2776a22d51a56"
+    },
+    {
+      "id": "fire-axe",
+      "name": "Fire Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/fire-axe",
+      "skill": "axe",
+      "attack": 38,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "63a990d1d2a3915f6005b393ba4dca5d0cf934e35527e2f81558fff0d9113788"
+    },
+    {
+      "id": "fire-sword",
+      "name": "Fire Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/fire-sword",
+      "skill": "sword",
+      "attack": 35,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "0967a2bfe24e0cdd5befc75bb1dc13c0cbf86fad40ce414a0e51478178460644"
+    },
+    {
+      "id": "foil",
+      "name": "Foil",
+      "sourceUrl": "https://primibia.com/wiki/items/foil",
+      "skill": "sword",
+      "attack": 9,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "20f606f258bd06455532009942d4cab6c9d07eb2c65edebfdfa960c70a448584"
+    },
+    {
+      "id": "giant-smithhammer",
+      "name": "Giant Smithhammer",
+      "sourceUrl": "https://primibia.com/wiki/items/giant-smithhammer",
+      "skill": "club",
+      "attack": 24,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "cbf235c6c0b8a29df8971e57d49433d83ef765589b4a0dd9d96ab07576e9697d"
+    },
+    {
+      "id": "giant-sword",
+      "name": "Giant Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/giant-sword",
+      "skill": "sword",
+      "attack": 46,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "fadf35b186d9b202b06965f9bcfd313d32f0c0110c9f054fcd092aedbb244cb6"
+    },
+    {
+      "id": "golden-sickle",
+      "name": "Golden Sickle",
+      "sourceUrl": "https://primibia.com/wiki/items/golden-sickle",
+      "skill": "axe",
+      "attack": 13,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "4b039f7b6b66d71befa74ec9f9062df335c93c3949bf3d054c990e641fc130d4"
+    },
+    {
+      "id": "great-axe",
+      "name": "Great Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/great-axe",
+      "skill": "axe",
+      "attack": 52,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "aa74dceb3abf08078cf2d810ee8f72be8cbcaedf2083e41f5f8dde020d85920c"
+    },
+    {
+      "id": "guardian-halberd",
+      "name": "Guardian Halberd",
+      "sourceUrl": "https://primibia.com/wiki/items/guardian-halberd",
+      "skill": "axe",
+      "attack": 46,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a69de56f061e84fba90cae58b4274ce57ef96c9adb098d433dd9c36554106be2"
+    },
+    {
+      "id": "halberd",
+      "name": "Halberd",
+      "sourceUrl": "https://primibia.com/wiki/items/halberd",
+      "skill": "axe",
+      "attack": 35,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2a116931b7c7f6e68a4a55fc54ce31b5ab6ab86661235d736878cefb821be1f3"
+    },
+    {
+      "id": "hammer-of-wrath",
+      "name": "Hammer of Wrath",
+      "sourceUrl": "https://primibia.com/wiki/items/hammer-of-wrath",
+      "skill": "club",
+      "attack": 48,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "3de08bbfb23a84cbb3940b8f14caf7b2964e52f5012a6930eb5808b803b522e7"
+    },
+    {
+      "id": "hand-axe",
+      "name": "Hand Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/hand-axe",
+      "skill": "axe",
+      "attack": 10,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "84dc4a2baf7248e1b949a7f73c5323c361a32c06f64c882066e683aa6ebcd469"
+    },
+    {
+      "id": "hatchet",
+      "name": "Hatchet",
+      "sourceUrl": "https://primibia.com/wiki/items/hatchet",
+      "skill": "axe",
+      "attack": 15,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "5cad5eee0c95d8b7edabfaccb9c5f0221799fcf4daef4c6347ccd9ee43b89646"
+    },
+    {
+      "id": "heavy-mace",
+      "name": "Heavy Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/heavy-mace",
+      "skill": "club",
+      "attack": 50,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "4b9c107bebc338ec4de53087132a5b72ec125d14223dfae1c9fbeadddb20e13c"
+    },
+    {
+      "id": "heavy-machete",
+      "name": "Heavy Machete",
+      "sourceUrl": "https://primibia.com/wiki/items/heavy-machete",
+      "skill": "sword",
+      "attack": 16,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "10f4b0dce032d29072720a5df9616215747a0c077f26b6cba98a381287683239"
+    },
+    {
+      "id": "hunting-spear",
+      "name": "Hunting Spear",
+      "sourceUrl": "https://primibia.com/wiki/items/hunting-spear",
+      "skill": "axe",
+      "attack": 18,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "b2a4cfb8c5462335f3d39ab4553f91103e788ce4ad772cf6822129441e5429e7"
+    },
+    {
+      "id": "ice-rapier",
+      "name": "Ice Rapier",
+      "sourceUrl": "https://primibia.com/wiki/items/ice-rapier",
+      "skill": "sword",
+      "attack": 100,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "613eb313cec9a3f312e45bdccdbaaa05b692be19e23f0d10f3061a4a4ffde499"
+    },
+    {
+      "id": "iron-hammer",
+      "name": "Iron Hammer",
+      "sourceUrl": "https://primibia.com/wiki/items/iron-hammer",
+      "skill": "club",
+      "attack": 18,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2f54e86393ca6b790beac6c41d55dfee046fd843ac9c625fbc5539021154899a"
+    },
+    {
+      "id": "katana",
+      "name": "Katana",
+      "sourceUrl": "https://primibia.com/wiki/items/katana",
+      "skill": "sword",
+      "attack": 16,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2a915ceb78850a2e7de8e5ef6bd6648e21306776720de205e816dd192657c546"
+    },
+    {
+      "id": "knife",
+      "name": "Knife",
+      "sourceUrl": "https://primibia.com/wiki/items/knife",
+      "skill": "sword",
+      "attack": 7,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "13981acd13ac562027a229453381b0e2f218628647df34f0a05a406228aeac44"
+    },
+    {
+      "id": "knight-axe",
+      "name": "Knight Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/knight-axe",
+      "skill": "axe",
+      "attack": 33,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "41586b132538dc6f53af6db7e45853acc2eb218273e47fefcdfb24c2c49154ad"
+    },
+    {
+      "id": "lich-staff",
+      "name": "Lich Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/lich-staff",
+      "skill": "club",
+      "attack": 40,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "6d1dcf93806eb90bc5477d59e8f57bed86870a06625934daf76fca1f0cada34f"
+    },
+    {
+      "id": "light-mace",
+      "name": "Light Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/light-mace",
+      "skill": "club",
+      "attack": 14,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "9051a39e68c62fd8ff7f7d234f3402701d15308b9d9427f9e29e2c102fe43c5f"
+    },
+    {
+      "id": "longsword",
+      "name": "Longsword",
+      "sourceUrl": "https://primibia.com/wiki/items/longsword",
+      "skill": "sword",
+      "attack": 17,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a70a4c9262f51fa0e1c92b8bddd8a543047aa28001e0d92b134fdef4676fdc0e"
+    },
+    {
+      "id": "mace",
+      "name": "Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/mace",
+      "skill": "club",
+      "attack": 16,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "9a7fc8509c9139142a623742c94cfcb6b04e4ff6b5ad5d99b97bb7684c459630"
+    },
+    {
+      "id": "machete",
+      "name": "Machete",
+      "sourceUrl": "https://primibia.com/wiki/items/machete",
+      "skill": "sword",
+      "attack": 12,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "5432e9afca25399ade39488f20387f7a777955632fe846f5957ac271af70611b"
+    },
+    {
+      "id": "magic-longsword",
+      "name": "Magic Longsword",
+      "sourceUrl": "https://primibia.com/wiki/items/magic-longsword",
+      "skill": "sword",
+      "attack": 55,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "6e55e988d2118c454eb07dcb508982282192343194c43a8b4387ba834845d56d"
+    },
+    {
+      "id": "magic-sword",
+      "name": "Magic Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/magic-sword",
+      "skill": "sword",
+      "attack": 48,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "457ad32e2934c29a0a15ecce2175a570ba1f66600d913724726433ae66cac3f6"
+    },
+    {
+      "id": "morning-star",
+      "name": "Morning Star",
+      "sourceUrl": "https://primibia.com/wiki/items/morning-star",
+      "skill": "club",
+      "attack": 25,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "d04bac77374460820d9cc0c4cfbc91ac5756b390a5cb01fda7a0bd0f2a5a278a"
+    },
+    {
+      "id": "naginata",
+      "name": "Naginata",
+      "sourceUrl": "https://primibia.com/wiki/items/naginata",
+      "skill": "axe",
+      "attack": 39,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "5696b71d32d7e45fdf59e3e343816e3453e096a1579b153ada27722da38a743e"
+    },
+    {
+      "id": "obsidian-lance",
+      "name": "Obsidian Lance",
+      "sourceUrl": "https://primibia.com/wiki/items/obsidian-lance",
+      "skill": "axe",
+      "attack": 34,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "12ed5651bb7275d2c59eec0427c968edc7b72a20679affb4808f77a8d3b6d9ff"
+    },
+    {
+      "id": "orcish-axe",
+      "name": "Orcish Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/orcish-axe",
+      "skill": "axe",
+      "attack": 23,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "7da29da08c95d3b65167e7b7be6b2c00263ad17bde794ce2f6bea88731ca69a1"
+    },
+    {
+      "id": "pharaoh-sword",
+      "name": "Pharaoh Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/pharaoh-sword",
+      "skill": "sword",
+      "attack": 41,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "f9d25c8ab13122d3237a54945b1e42295685b4d557d5741fe547189abbef84eb"
+    },
+    {
+      "id": "poison-dagger",
+      "name": "Poison Dagger",
+      "sourceUrl": "https://primibia.com/wiki/items/poison-dagger",
+      "skill": "sword",
+      "attack": 18,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "e5f086b9bb8a49aafa5e59ae5da7251df3fcc198c0712a47ef695d1511a164f0"
+    },
+    {
+      "id": "rapier",
+      "name": "Rapier",
+      "sourceUrl": "https://primibia.com/wiki/items/rapier",
+      "skill": "sword",
+      "attack": 10,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "772fb3b6f3ae5908ae753505840c055238968243de78392fa6e72ed268810a55"
+    },
+    {
+      "id": "ravagers-axe",
+      "name": "Ravager'S Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/ravagers-axe",
+      "skill": "axe",
+      "attack": 49,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "b498e926010a1d705d4322a4d68a66c2503f81e48f1e36b52d07bb993b98595d"
+    },
+    {
+      "id": "ripper-lance",
+      "name": "Ripper Lance",
+      "sourceUrl": "https://primibia.com/wiki/items/ripper-lance",
+      "skill": "axe",
+      "attack": 28,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "b47da30877933b29f9f952f97e5b89beb88a0d2d3a61ea26e9bb82c25a84fb17"
+    },
+    {
+      "id": "sabre",
+      "name": "Sabre",
+      "sourceUrl": "https://primibia.com/wiki/items/sabre",
+      "skill": "sword",
+      "attack": 12,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "98128729c2b043b8a3a2fed3265ac76a764f02f3180fcdaa0834d5dd42386874"
+    },
+    {
+      "id": "scimitar",
+      "name": "Scimitar",
+      "sourceUrl": "https://primibia.com/wiki/items/scimitar",
+      "skill": "sword",
+      "attack": 19,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "4e683f58ff3b03a1b5c2d40f3a0b2220af7a0c2a5f9961b8887198d392be1bd4"
+    },
+    {
+      "id": "scythe",
+      "name": "Scythe",
+      "sourceUrl": "https://primibia.com/wiki/items/scythe",
+      "skill": "club",
+      "attack": 8,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "e8905ddcc9adb22df028080859908aa23c97d8527b5811f0767c8cf67c0db9de"
+    },
+    {
+      "id": "serpent-sword",
+      "name": "Serpent Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/serpent-sword",
+      "skill": "sword",
+      "attack": 26,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "4b45dd70df0acfe6b463709f96c34a3608a66951d193a2278fe64f8ee1a07988"
+    },
+    {
+      "id": "short-sword",
+      "name": "Short Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/short-sword",
+      "skill": "sword",
+      "attack": 11,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "2e14577985f67a1bf9d9978b17d7da64bd0ca748472549f7351a2f480e5b9dd5"
+    },
+    {
+      "id": "sickle",
+      "name": "Sickle",
+      "sourceUrl": "https://primibia.com/wiki/items/sickle",
+      "skill": "axe",
+      "attack": 7,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "ed4d677dde3e66f8aec61a146980ddd7fc660a15408eed29dc68b9940be3f91d"
+    },
+    {
+      "id": "silver-dagger",
+      "name": "Silver Dagger",
+      "sourceUrl": "https://primibia.com/wiki/items/silver-dagger",
+      "skill": "sword",
+      "attack": 8,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "9d8fc4351567f5c8b9f57b9f2aaddf31bc5ccc92a4081fa384b36d6044938a4e"
+    },
+    {
+      "id": "silver-mace",
+      "name": "Silver Mace",
+      "sourceUrl": "https://primibia.com/wiki/items/silver-mace",
+      "skill": "club",
+      "attack": 40,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "b2b5f3edbfd28805793d876647534363b6a67355bf67182a2ec13b3946dc82ed"
+    },
+    {
+      "id": "skull-staff",
+      "name": "Skull Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/skull-staff",
+      "skill": "club",
+      "attack": 36,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "f2e981ec5e0d3628ec910a7fa584b23a65dd26e43d771cea9882cda8abd783d9"
+    },
+    {
+      "id": "spike-sword",
+      "name": "Spike Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/spike-sword",
+      "skill": "sword",
+      "attack": 24,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a99b03d3b62218272a583a619aa0b28ba3ddd58e45539cdde3abb4706dda5299"
+    },
+    {
+      "id": "staff",
+      "name": "Staff",
+      "sourceUrl": "https://primibia.com/wiki/items/staff",
+      "skill": "club",
+      "attack": 10,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "b7cb90bc8fe955de59d656242b28e8813b72bd07e2334aa49c919debabd8bdde"
+    },
+    {
+      "id": "stonecutter-axe",
+      "name": "Stonecutter Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/stonecutter-axe",
+      "skill": "axe",
+      "attack": 50,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "56b2bacbd7296bf65352f8e2ecf84e08171d3b51d37c899f2ebcbdeb9f914289"
+    },
+    {
+      "id": "studded-club",
+      "name": "Studded Club",
+      "sourceUrl": "https://primibia.com/wiki/items/studded-club",
+      "skill": "club",
+      "attack": 9,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "470c301486ca1a53172b95bf86b475498947d9630ca993d125267db607f87103"
+    },
+    {
+      "id": "sword",
+      "name": "Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/sword",
+      "skill": "sword",
+      "attack": 14,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "0c674d6ecdf3b731b6f16c0106213be72429f9472ce6ca5d1542fcd906c96c3d"
+    },
+    {
+      "id": "templar-scytheblade",
+      "name": "Templar Scytheblade",
+      "sourceUrl": "https://primibia.com/wiki/items/templar-scytheblade",
+      "skill": "sword",
+      "attack": 23,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "4893c5c5ac488e52e3db5ccf11f1568bd57b4c156399f0e6cf953c53c357b688"
+    },
+    {
+      "id": "thunder-hammer",
+      "name": "Thunder Hammer",
+      "sourceUrl": "https://primibia.com/wiki/items/thunder-hammer",
+      "skill": "club",
+      "attack": 49,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "7a387846ef08b070a01bd300e64e06339052866b7cf71051e669258412490a49"
+    },
+    {
+      "id": "twin-axe",
+      "name": "Twin Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/twin-axe",
+      "skill": "axe",
+      "attack": 45,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "d183eeb25d8f2ccfc8cfb8ef9f286b550f889025a82380241c7b6dd8104d3818"
+    },
+    {
+      "id": "two-handed-sword",
+      "name": "Two Handed Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/two-handed-sword",
+      "skill": "sword",
+      "attack": 30,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "deee122e6ccce3a695afdedf8f6bddf0239d1d52e6cad4079cdc69d0d376b408"
+    },
+    {
+      "id": "war-axe",
+      "name": "War Axe",
+      "sourceUrl": "https://primibia.com/wiki/items/war-axe",
+      "skill": "axe",
+      "attack": 20,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "72709794e8bcbbc860f1a0a34154d442f4705f2b3caa532d0e7c36444daf190e"
+    },
+    {
+      "id": "war-hammer",
+      "name": "War Hammer",
+      "sourceUrl": "https://primibia.com/wiki/items/war-hammer",
+      "skill": "club",
+      "attack": 45,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "e8966f881f3623e21e1b38edf5c4647be5a15e849e20284cf2f406e29792752d"
+    },
+    {
+      "id": "warlord-sword",
+      "name": "Warlord Sword",
+      "sourceUrl": "https://primibia.com/wiki/items/warlord-sword",
+      "skill": "sword",
+      "attack": 53,
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "990abde491d2642d82aeab8cec5260fb66baa210d6707af970dc4da0f3abdf19"
+    }
+  ],
+  "excluded": []
+}

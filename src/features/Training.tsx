@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Apple, ArrowRight, Clock3, Droplets, Save, Sparkles, Package } from 'lucide-react';
+import { Apple, ArrowRight, Clock3, Droplets, Save, Sparkles, Package, Settings2 } from 'lucide-react';
 import { useApp } from '../context';
 import { Badge, Evidence, External, Field, Notice, PageHeader, Stat, Tabs, duration, gp, number } from '../shared';
 import type { Vocation } from '../types';
 import { spells } from '../data/game';
-import { FOODS, RUNE_RECIPES, SOURCES, VOCATIONS, characterStats, foodPlan, magicMultiplier, magicPlan,
-  manaFluidPlan, regeneration, runePlan } from '../domain/mechanics';
+import { FOODS, FOOD_SOURCES, SOURCES, VOCATIONS, characterStats, foodPlan, foodPlanSeconds, magicMultiplier, magicPlan,
+  manaFluidPlan, regeneration } from '../domain/mechanics';
+import { effectiveSpell, spellOverrideKey } from '../domain/spellCatalog';
+import { runeBatchFromSpell } from '../domain/runeProduction';
+import FoodComparison from '../components/FoodComparison';
+import ItemSprite from '../components/ItemSprite';
+import SpellEditor from '../components/SpellEditor';
+import SpellSprite from '../components/SpellSprite';
 import SkillTraining from './SkillTraining';
+import './training-updates.css';
 
 function Numeric({ value, onChange, min = 0, max, step = 1 }: {
   value: number; onChange: (value: number) => void; min?: number; max?: number; step?: number | 'any';
@@ -30,6 +37,7 @@ function FoodView({ vocation, promoted }: { vocation: Vocation; promoted: boolea
   const [hours, setHours] = useState(3);
   const [fedMinutes, setFedMinutes] = useState(0);
   const [price, setPrice] = useState<number | null>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
   const food = FOODS.find(item => item.id === foodId)!;
   const plan = foodPlan(food, hours, fedMinutes * 60, price);
   const regen = regeneration(vocation, promoted, server.regenerationRate);
@@ -57,6 +65,7 @@ function FoodView({ vocation, promoted }: { vocation: Vocation; promoted: boolea
           <Stat label="Carried weight" value={plan ? number(plan.weight, 1) + ' oz' : '—'} detail={plan?.cost !== null && plan ? gp(plan.cost) : 'Add a price to calculate cost'} />
         </div>
         {plan && <p className="muted">Eat up to <strong>{number(plan.fillNow)}</strong> now to reach {duration(plan.fedAfterFillingSeconds)} of nourishment. The rest is for refilling as you play.</p>}
+        <button className="btn" onClick={() => setCompareOpen(true)} disabled={!plan}><Apple size={16} />Compare food for these hours</button>
       </section>
       <section className="card">
         <div className="toolbar"><h2>While you stay fed</h2><Droplets size={19} /></div>
@@ -70,19 +79,12 @@ function FoodView({ vocation, promoted }: { vocation: Vocation; promoted: boolea
         <p className="muted">These are fed, active-regeneration estimates. Mana at its cap cannot keep accumulating. Server regeneration: ×{number(server.regenerationRate, 2)}.</p>
       </section>
     </div>
-    <section className="card">
-      <h2>Compare food</h2>
-      <div style={{ overflowX: 'auto' }}><table className="data-table"><thead><tr>
-        <th>Food</th><th>Lasts</th><th>Weight</th><th>Minutes / oz</th><th>Potential mana</th><th></th>
-      </tr></thead><tbody>{FOODS.map(item => <tr key={item.id}>
-        <td><strong>{item.name}</strong></td><td>{duration(item.seconds)}</td><td>{number(item.weight, 1)} oz</td>
-        <td>{number(item.seconds / 60 / item.weight, 1)}</td><td>{regen ? '≈ ' + number(item.seconds * regen.manaPerSecond, 1) : '—'}</td>
-        <td><button className="btn" onClick={() => { setFoodId(item.id); setPrice(null); }} disabled={foodId === item.id}>{foodId === item.id ? 'Selected' : 'Use food'}</button></td>
-      </tr>)}</tbody></table></div>
-    </section>
+    {compareOpen && <FoodComparison title={`${number(hours, 2)} hours of nourishment`} requiredSeconds={hours * 3600} alreadyFedSeconds={fedMinutes * 60} selectedFoodId={foodId}
+      onSelect={id => { setFoodId(id); setPrice(null); }} onClose={() => setCompareOpen(false)} />}
     <Evidence><p>Food durations and weights use the early guide and legacy reference candidates. The 20-minute fullness rule and complete regeneration table remain reconstructed baseline values, rather than a claim that every field has an independent 7.7 measurement.</p>
       <p><External href={SOURCES.food}>Early food guide</External> · <External href={SOURCES.knight}>June 2006 knight regeneration fixture</External> · <External href={SOURCES.update}>Official 7.6 magic-system update</External></p>
       <p>No resting-area, stamina or modern reward bonuses are included. Fishing catch probabilities and Dough-to-Bread conversions are not included as verified game rules.</p>
+      {FOOD_SOURCES.slice(1).map(source => <p key={source.url}><External href={source.url}>{source.title}</External> · {source.note}</p>)}
     </Evidence>
   </>;
 }
@@ -96,10 +98,14 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
   const [fluidPrice, setFluidPrice] = useState(55);
   const [flaskRefund, setFlaskRefund] = useState(5);
   const [busy, setBusy] = useState(false);
+  const [foodId, setFoodId] = useState('fish');
+  const [compareOpen, setCompareOpen] = useState(false);
   useEffect(() => { setCurrent(character.magicLevel); setRemaining(character.magicPercentRemaining); setTarget(character.goalML); }, [character.id, character.magicLevel, character.magicPercentRemaining, character.goalML]);
   const plan = magicPlan({ current, remainingPercent: remaining, target, vocation, promoted,
     regenerationRate: server.regenerationRate, magicRate: server.magicRate });
   const fluids = plan ? manaFluidPlan(plan.mana, fluidMana, fluidPrice, flaskRefund) : null;
+  const food = FOODS.find(item => item.id === foodId)!;
+  const foodRecovery = plan ? foodPlanSeconds(food, plan.seconds) : null;
   async function save() {
     if (!plan || target <= current || busy) return;
     setBusy(true);
@@ -136,6 +142,14 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
         <p className="muted">Promotion changes the regeneration time, not the vocation’s mana requirement. Food alone does not raise magic level.</p>
       </section>
     </div>
+    <section className="card training-food-goal">
+      <div><div className="item-with-sprite"><ItemSprite name={food.name} /><h2>Food for this magic-level goal</h2></div>
+        <p className="muted">Cover the natural mana recovery needed for {number(current)} → {number(target)}. This assumes continuous feeding and mana spending; fluids are a separate budget.</p></div>
+      <div className="training-food-selection"><Field label="Food for ML recovery"><select value={foodId} onChange={event => setFoodId(event.target.value)}>{FOODS.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select></Field>
+        <strong>{foodRecovery ? `${number(foodRecovery.quantity)} × ${food.name} · ${number(foodRecovery.weight, 2)} oz` : 'Choose a valid goal'}</strong>
+        <button className="btn" onClick={() => setCompareOpen(true)} disabled={!foodRecovery || target <= current}><Apple size={16} />Compare food for ML recovery</button></div>
+    </section>
+    {compareOpen && plan && <FoodComparison title={`Magic level ${current} → ${target}: mana recovery`} requiredSeconds={plan.seconds} selectedFoodId={foodId} onSelect={setFoodId} onClose={() => setCompareOpen(false)} />}
     <div className="grid-2">
       <section className="card">
         <h2>Mana-fluid budget</h2>
@@ -163,119 +177,133 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
   </>;
 }
 
-function recipeWithSoul(id: string) {
-  const recipe = RUNE_RECIPES.find(item => item.id === id)!;
-  const reference = spells.find(spell => spell.words.toLowerCase() === recipe.words);
-  return { ...recipe, soul: reference?.soulCost ?? recipe.soul };
-}
+const runeSpells = spells.filter(spell => spell.type === 'rune').sort((a, b) => a.name.localeCompare(b.name));
 
 function RuneView({ vocation, promoted }: { vocation: Vocation; promoted: boolean }) {
-  const { character, server, navigate } = useApp();
-  const [recipeId, setRecipeId] = useState(character.vocation === 'sorcerer' ? 'hmm' : 'uh');
-  const recipe = recipeWithSoul(recipeId);
+  const { state, character, server, navigate } = useApp();
+  const [recipeId, setRecipeId] = useState(character.vocation === 'sorcerer' ? 'heavy-magic-missile' : 'ultimate-healing-rune');
+  const baseRecipe = runeSpells.find(spell => spell.id === recipeId) ?? runeSpells[0];
+  const recipe = effectiveSpell(state, server.id, baseRecipe);
+  const hasOverrides = Boolean(Object.keys(state.spellOverrides?.[spellOverrideKey(server.id, recipe.id)] ?? {}).length);
+  const [editOpen, setEditOpen] = useState(false);
   const [amount, setAmount] = useState(1);
   const [unit, setUnit] = useState('backpacks');
   const [packSize, setPackSize] = useState(20);
   const [blanks, setBlanks] = useState(20);
   const [currentMana, setCurrentMana] = useState(0);
-  const [manaOverride, setManaOverride] = useState<number | null>(null);
+  const [maximumManaOverride, setMaximumManaOverride] = useState<number | null>(null);
   const [currentSoul, setCurrentSoul] = useState(promoted ? 200 : 100);
-  const [soulOverride, setSoulOverride] = useState<number | null>(null);
   const [foodId, setFoodId] = useState('fish');
+  const [compareOpen, setCompareOpen] = useState(false);
   const [blankPrice, setBlankPrice] = useState<number | null>(null);
   const [foodPrice, setFoodPrice] = useState<number | null>(null);
   const [salePrice, setSalePrice] = useState<number | null>(null);
   const regen = regeneration(vocation, promoted, server.regenerationRate);
   const derived = characterStats(character.level, vocation);
-  const maximumMana = manaOverride ?? (vocation === character.vocation ? character.maxMana : undefined) ?? derived?.mana ?? 0;
-  const soulCost = soulOverride ?? recipe.soul;
+  const maximumMana = maximumManaOverride ?? (vocation === character.vocation ? character.maxMana : undefined) ?? derived?.mana ?? 0;
   const objects = amount * (unit === 'backpacks' ? packSize : 1);
-  const plan = regen ? runePlan({ objects, manaPerCast: recipe.mana, chargesPerObject: recipe.charges,
-    currentMana, maximumMana, blankRunes: blanks, soulPerCast: soulCost, currentSoul,
-    manaPerSecond: regen.manaPerSecond }) : null;
-  const food = FOODS.find(item => item.id === foodId)!;
-  const foodNeeded = plan?.regenerationSeconds !== null && plan?.regenerationSeconds !== undefined ? Math.ceil(plan.regenerationSeconds / food.seconds) : null;
-  const vocationFits = vocation !== 'unselected' && recipe.vocations.includes(vocation);
-  const levelFits = character.level >= recipe.level;
   const soulValid = Number.isFinite(currentSoul) && currentSoul >= 0 && currentSoul <= (promoted ? 200 : 100);
-  const unitsValid = Number.isInteger(amount) && amount >= 0 && Number.isInteger(packSize) && packSize >= 1;
-  const materialBudget = plan && foodNeeded !== null && blankPrice !== null && foodPrice !== null &&
+  const unitsValid = Number.isSafeInteger(amount) && amount >= 0 && amount <= 1000000 &&
+    (unit !== 'backpacks' || Number.isSafeInteger(packSize) && packSize >= 1 && packSize <= 1000);
+  const plan = regen && soulValid && unitsValid ? runeBatchFromSpell(recipe, {
+    objects, currentMana, maximumMana, blankRunes: blanks, currentSoul, manaPerSecond: regen.manaPerSecond,
+  }) : null;
+  const food = FOODS.find(item => item.id === foodId)!;
+  const foodRecovery = plan?.regenerationSeconds != null ? foodPlanSeconds(food, plan.regenerationSeconds) : null;
+  const vocationFits = recipe.vocations === null ? null : vocation !== 'unselected' && recipe.vocations.includes(vocation);
+  const levelFits = recipe.level === null ? null : character.level >= recipe.level;
+  const vocationsText = recipe.vocations === null ? 'Vocation availability is unknown' : recipe.vocations.length
+    ? recipe.vocations.map(v => VOCATIONS.find(item => item.id === v)?.name ?? v).join(', ') : 'Unavailable for creation';
+  const materialBudget = plan && foodRecovery && blankPrice !== null && foodPrice !== null &&
     Number.isFinite(blankPrice) && Number.isFinite(foodPrice) && blankPrice >= 0 && foodPrice >= 0
-    ? plan.objects * blankPrice + foodNeeded * foodPrice : null;
+    ? plan.objects * blankPrice + foodRecovery.quantity * foodPrice : null;
   const saleValue = plan && salePrice !== null && Number.isFinite(salePrice) && salePrice >= 0 ? plan.objects * salePrice : null;
+  const soulLabel = recipe.soulCost === null ? 'Soul cost unknown' : recipe.soulCost === 0 ? 'No soul cost' : `${number(recipe.soulCost)} soul per cast`;
   return <>
     <div className="grid-2">
       <section className="card">
-        <div className="toolbar"><h2>Plan a rune batch</h2><Badge tone="blue">Reference estimate</Badge></div>
+        <div className="toolbar"><h2>Plan a rune batch</h2><Badge tone={hasOverrides ? 'gold' : 'blue'}>{hasOverrides ? 'Server settings' : 'Reference estimate'}</Badge></div>
         <div className="form-grid">
-          <Field label="Creation spell"><select value={recipeId} onChange={e => { setRecipeId(e.target.value); setSoulOverride(null); setSalePrice(null); }}>
-            {RUNE_RECIPES.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}
+          <Field label="Creation spell"><select value={baseRecipe.id} onChange={event => { setRecipeId(event.target.value); setSalePrice(null); }}>
+            {runeSpells.map(spell => <option key={spell.id} value={spell.id}>{spell.name}</option>)}
           </select></Field>
           <Field label="Quantity"><Numeric value={amount} onChange={setAmount} max={1000000} /></Field>
-          <Field label="Unit"><select value={unit} onChange={e => setUnit(e.target.value)}><option value="backpacks">Backpacks of rune items</option><option value="items">Individual rune items</option></select></Field>
+          <Field label="Unit"><select value={unit} onChange={event => setUnit(event.target.value)}><option value="backpacks">Backpacks of rune items</option><option value="items">Individual rune items</option></select></Field>
           {unit === 'backpacks' && <Field label="Rune items per backpack"><Numeric value={packSize} onChange={setPackSize} min={1} max={1000} /></Field>}
         </div>
-        <p><strong>{recipe.words}</strong> · {recipe.mana} mana per cast · {recipe.charges} charge{recipe.charges === 1 ? '' : 's'} per rune item</p>
-        <p className="muted">Creation reference: level {recipe.level}+; {recipe.vocations.map(v => VOCATIONS.find(item => item.id === v)?.name).join(', ')}. Spell learning must also be satisfied.</p>
-        {vocation !== 'unselected' && !vocationFits && <Notice>This creation spell is outside the selected vocation’s reference list. You can still inspect the batch or track these runes in stock.</Notice>}
-        {!levelFits && <Notice>Character level {character.level} is below this creation reference’s level {recipe.level}.</Notice>}
+        <div className="rune-settings-summary"><div className="item-with-sprite"><SpellSprite spell={recipe} size={38} /><div><strong>{recipe.words}</strong>
+          <p>{recipe.mana === null ? 'Mana unknown' : `${number(recipe.mana)} mana per cast`} · {recipe.runeCharges === null ? 'Charges unknown' : `${number(recipe.runeCharges)} charge${recipe.runeCharges === 1 ? '' : 's'} per rune`}<br />{soulLabel}</p></div></div>
+          <button className="btn" onClick={() => setEditOpen(true)}><Settings2 size={15} />Edit rune settings</button></div>
+        <p className="muted">Mana, charges and soul are shared with the spellbook and saved for <strong>{server.name}</strong>. They stay with this rune when you change selections.</p>
+        <p className="muted">Creation reference: {recipe.level === null ? 'level unknown' : `level ${recipe.level}+`}; {vocationsText}. The spell must be learned{recipe.premium === true ? ' and requires premium' : ''}{recipe.promotion === true ? ' and promotion' : ''}.</p>
+        {vocation !== 'unselected' && vocationFits === false && <Notice>This creation spell is outside the selected vocation’s settings. You can still inspect the batch or track these runes in stock.</Notice>}
+        {levelFits === false && <Notice>Character level {character.level} is below this creation reference’s level {recipe.level}.</Notice>}
+        {recipe.promotion === true && !promoted && <Notice>This spell’s reference requires promotion.</Notice>}
+        {recipe.mana === null || recipe.runeCharges === null ? <Notice>Set this rune’s mana and charges in “Edit rune settings” to calculate a batch. Unknown values are kept unknown.</Notice> : null}
       </section>
       <section className="card">
         <h2>Available resources</h2>
         <div className="form-grid">
           <Field label="Blank rune items"><Numeric value={blanks} onChange={setBlanks} /></Field>
-          <Field label="Current mana"><Numeric value={currentMana} onChange={setCurrentMana} max={maximumMana || undefined} /></Field>
-          <Field label="Maximum mana" hint={manaOverride === null && !character.maxMana ? 'Estimated from level and vocation; adjust if your actual maximum differs.' : 'The maximum must cover one complete cast.'}>
-            <Numeric value={maximumMana} onChange={setManaOverride} min={1} />
-          </Field>
-          <Field label="Current soul"><Numeric value={currentSoul} onChange={setCurrentSoul} max={promoted ? 200 : 100} /></Field>
-          <Field label="Soul per cast" hint={recipe.soul === null ? 'Unknown in the reference. Enter your server’s value to finish the resource check.' : 'Reference value; edit for your server.'}>
-            <input type="number" value={soulCost ?? ''} min={1} step={1} placeholder="Enter soul cost"
-              onChange={e => setSoulOverride(e.target.value === '' ? null : Number(e.target.value))} />
-          </Field>
-          <Field label="Food for mana recovery"><select value={foodId} onChange={e => { setFoodId(e.target.value); setFoodPrice(null); }}>{FOODS.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
+          <Field label="Mana currently available"><Numeric value={currentMana} onChange={setCurrentMana} max={maximumMana} /></Field>
+          <Field label="Your maximum mana" hint="Blank uses your profile, or the level/vocation estimate for this preview."><input type="number" min={0} value={maximumManaOverride ?? ''} placeholder={String(maximumMana)} onChange={event => setMaximumManaOverride(event.target.value === '' ? null : Number(event.target.value))} /></Field>
+          <Field label="Soul points currently available" hint={`Standard capacity: ${promoted ? 200 : 100}. A rune with 0 soul cost has no soul limit.`}><Numeric value={currentSoul} onChange={setCurrentSoul} max={promoted ? 200 : 100} /></Field>
         </div>
+        {vocation === 'unselected' && <Notice>Choose a calculator vocation above to calculate recovery time.</Notice>}
+        {!soulValid && <Notice tone="warning">Enter current soul from 0 to {promoted ? 200 : 100}.</Notice>}
+        {!unitsValid && <Notice tone="warning">Use a whole quantity from 0–1,000,000 and a backpack size from 1–1,000.</Notice>}
+        {regen && soulValid && unitsValid && recipe.mana !== null && recipe.runeCharges !== null && !plan && <Notice tone="warning">Check the resource inputs. Current mana cannot exceed maximum mana; totals must fit the calculator’s safe range.</Notice>}
+        <p className="muted">The recovery estimate subtracts your current mana once. You must spend mana and refill food as you go to avoid losing regeneration at the mana cap.</p>
       </section>
     </div>
-    {(!plan || !soulValid || !unitsValid) && <Notice tone="warning">Choose a vocation and valid whole quantities. Current mana must fit your maximum; soul must be between 0 and {promoted ? 200 : 100}.</Notice>}
-    {plan && soulValid && unitsValid && <>
-      <div className="stat-grid">
-        <Stat label="Rune items" value={number(plan.objects)} detail={`${number(plan.charges)} total charges / uses`} icon={<Package size={17} />} />
-        <Stat label="Mana to spend" value={number(plan.mana)} detail={`${number(plan.casts)} casts × ${number(recipe.mana)} mana`} icon={<Droplets size={17} />} />
-        <Stat label="Mana recovery time" value={longDuration(plan.regenerationSeconds)} detail="Excludes casting, travel and future soul recovery" icon={<Clock3 size={17} />} />
-        <Stat label="Food for that recovery" value={foodNeeded === null ? '—' : number(foodNeeded)} detail={food.name} icon={<Apple size={17} />} />
+    {plan && <>
+      <div className="stat-grid rune-production-stats">
+        <Stat label="Rune items / casts" value={number(plan.objects)} detail={unit === 'backpacks' ? `${number(amount)} backpacks × ${number(packSize)} items` : 'One cast creates one rune item'} icon={<Package size={17} />} />
+        <Stat label="Total charges" value={number(plan.charges)} detail={`${number(recipe.runeCharges!)} charges per rune item`} />
+        <Stat label="Total mana spent" value={quantity(plan.mana)} detail={`${number(plan.casts)} casts × ${number(recipe.mana!)} mana`} icon={<Sparkles size={17} />} />
+        <Stat label="Mana recovery time" value={longDuration(plan.regenerationSeconds)} detail={plan.capacityFits ? 'Fed regeneration; current mana deducted' : 'Maximum mana is too low for one cast'} icon={<Clock3 size={17} />} />
       </div>
-      <section className="card">
-        <div className="toolbar"><h2>Resource check</h2><Badge tone={plan.resourcesSufficient && vocationFits && levelFits ? 'green' : 'muted'}>
-          {plan.resourcesSufficient && vocationFits && levelFits ? 'Listed resources covered' : 'Review requirements'}
-        </Badge></div>
-        <div style={{ overflowX: 'auto' }}><table className="data-table"><thead><tr><th>Resource</th><th>Needed</th><th>Available</th><th>Result</th></tr></thead><tbody>
-          <tr><td>Blank runes</td><td>{number(plan.objects)}</td><td>{number(blanks)}</td><td>{plan.blankShortfall ? `${number(plan.blankShortfall)} more needed` : 'Covered'}</td></tr>
-          <tr><td>Mana for one cast</td><td>{number(recipe.mana)}</td><td>{number(maximumMana)} maximum</td><td>{plan.capacityFits ? 'Fits maximum' : 'Maximum mana too low'}</td></tr>
-          <tr><td>Soul points</td><td>{plan.soulNeeded === null ? 'Add soul cost' : number(plan.soulNeeded)}</td><td>{number(currentSoul)}</td><td>{plan.soulShortfall === null ? 'Not yet checked' : plan.soulShortfall ? `${number(plan.soulShortfall)} more needed` : 'Covered'}</td></tr>
-        </tbody></table></div>
-        <p className="muted">Soul only recovers after qualifying activity. This batch never assumes unlimited passive soul regeneration, and planning does not add stock.</p>
-        <button className="btn" onClick={() => navigate('supplies')}>Record actual production in stock <ArrowRight size={16} /></button>
+      <section className="card training-food-goal">
+        <div><div className="item-with-sprite"><ItemSprite name={food.name} /><h2>Food for this rune batch</h2></div><p className="muted">Cover this batch’s natural mana recovery at the selected vocation, promotion and server rate. Soul recovery and casting delays are separate.</p></div>
+        <div className="training-food-selection"><Field label="Food for rune recovery"><select value={foodId} onChange={event => { setFoodId(event.target.value); setFoodPrice(null); }}>{FOODS.map(item => <option value={item.id} key={item.id}>{item.name}</option>)}</select></Field>
+          <strong>{foodRecovery ? `${number(foodRecovery.quantity)} × ${food.name} · ${number(foodRecovery.weight, 2)} oz` : 'Maximum mana must cover one cast'}</strong>
+          <button className="btn" disabled={!foodRecovery} onClick={() => setCompareOpen(true)}><Apple size={16} />Compare food for rune recovery</button></div>
       </section>
-      <section className="card">
-        <h2>Optional batch budget</h2>
-        <p className="muted">Use your own prices. This estimates replacement cost for blank runes and food during natural mana recovery.</p>
-        <div className="form-grid">
-          <Field label="Blank rune price (gp each)"><input type="number" min={0} step="any" placeholder="Enter a price" value={blankPrice ?? ''} onChange={e => setBlankPrice(e.target.value === '' ? null : Number(e.target.value))} /></Field>
-          <Field label={`${food.name} price (gp each)`}><input type="number" min={0} step="any" placeholder="Enter a price" value={foodPrice ?? ''} onChange={e => setFoodPrice(e.target.value === '' ? null : Number(e.target.value))} /></Field>
-          <Field label="Selling price per rune item (gp)" hint="Price for one rune object with all its charges, not one use."><input type="number" min={0} step="any" placeholder="Optional" value={salePrice ?? ''} onChange={e => setSalePrice(e.target.value === '' ? null : Number(e.target.value))} /></Field>
-        </div>
-        <div className="stat-grid">
-          <Stat label="Materials budget" value={materialBudget === null ? '—' : gp(materialBudget)} detail="Blank runes + food; add both prices to calculate" />
-          <Stat label="Planned sale value" value={saleValue === null ? '—' : gp(saleValue)} detail={`${number(plan.objects)} rune items`} />
-          <Stat label="Margin over materials" value={materialBudget === null || saleValue === null ? '—' : gp(saleValue - materialBudget)} detail="Before any fluids, travel or other costs" />
-        </div>
-      </section>
+      <div className="grid-2">
+        <section className="card">
+          <h2>Resource coverage</h2>
+          <div className="rune-resources-table"><table className="data-table"><thead><tr><th>Resource</th><th>Needed</th><th>Available</th><th>Result</th></tr></thead><tbody>
+            <tr><td>Blank runes</td><td>{number(plan.objects)}</td><td>{number(blanks)}</td><td>{plan.blankShortfall ? `${number(plan.blankShortfall)} more needed` : 'Covered'}</td></tr>
+            <tr><td>Mana for one cast</td><td>{number(recipe.mana!)}</td><td>{number(maximumMana)} maximum</td><td>{plan.capacityFits ? 'Fits maximum' : 'Maximum mana too low'}</td></tr>
+            <tr><td>Soul points</td><td>{plan.soulNeeded === null ? 'Unknown' : number(plan.soulNeeded)}</td><td>{number(currentSoul)}</td><td>{recipe.soulCost === 0 ? 'No soul required' : plan.soulShortfall === null ? 'Set soul cost to check' : plan.soulShortfall ? `${number(plan.soulShortfall)} more needed` : 'Covered'}</td></tr>
+          </tbody></table></div>
+          <p className="muted">{recipe.soulCost === 0 ? 'This rune has no soul cost in the selected server settings.' : plan.availableSoulCasts === null ? 'Soul cost is unknown. Set it in rune settings to check coverage.' : `Your current soul covers ${number(plan.availableSoulCasts)} casts. Further soul requires qualifying activity.`} Planning never adds finished runes to stock.</p>
+          <button className="btn" onClick={() => navigate('supplies')}>Record actual production in stock <ArrowRight size={16} /></button>
+        </section>
+        <section className="card">
+          <h2>Optional batch budget</h2>
+          <p className="muted">Use your own prices for blank runes and food during natural mana recovery.</p>
+          <div className="form-grid">
+            <Field label="Blank rune price (gp each)"><input type="number" min={0} step="any" placeholder="Enter a price" value={blankPrice ?? ''} onChange={event => setBlankPrice(event.target.value === '' ? null : Number(event.target.value))} /></Field>
+            <Field label={`${food.name} price (gp each)`}><input type="number" min={0} step="any" placeholder="Enter a price" value={foodPrice ?? ''} onChange={event => setFoodPrice(event.target.value === '' ? null : Number(event.target.value))} /></Field>
+            <Field label="Selling price per rune item (gp)" hint="Price for one rune item with all its charges, not one use."><input type="number" min={0} step="any" placeholder="Optional" value={salePrice ?? ''} onChange={event => setSalePrice(event.target.value === '' ? null : Number(event.target.value))} /></Field>
+          </div>
+          <div className="stat-grid">
+            <Stat label="Materials budget" value={materialBudget === null ? '—' : gp(materialBudget)} detail="Blank runes + food; add both prices to calculate" />
+            <Stat label="Planned sale value" value={saleValue === null ? '—' : gp(saleValue)} detail={`${number(plan.objects)} rune items`} />
+            <Stat label="Margin over materials" value={materialBudget === null || saleValue === null ? '—' : gp(saleValue - materialBudget)} detail="Before fluids, learning fees, travel or other costs" />
+          </div>
+        </section>
+      </div>
     </>}
+    {compareOpen && plan?.regenerationSeconds != null && <FoodComparison title={`${number(plan.objects)} ${recipe.name} items: mana recovery`} requiredSeconds={plan.regenerationSeconds} selectedFoodId={foodId}
+      onSelect={id => { setFoodId(id); setFoodPrice(null); }} onClose={() => setCompareOpen(false)} />}
+    {editOpen && <SpellEditor spell={baseRecipe} onClose={() => setEditOpen(false)} />}
     <Evidence>
-      <p>UH 400 mana at level 24 and HMM 280 mana at level 25 have contemporary 7.6-period support. Other creation requirements and charge counts use labelled 7.72 reconstruction references; check your server’s spell book. Soul costs shown here come from the spell reference when available and can be edited.</p>
-      <p>Rune objects, charges, casts and backpack capacity remain separate. One cast is modelled as one rune object. Maximum mana is estimated assuming vocation selection at level 8 unless you enter an actual value.</p>
-      <p><External href={SOURCES.runes}>Legacy rune reconstruction</External> · <External href={SOURCES.soul}>Soul mechanics reference</External></p>
+      <p>Creation requirements and charge counts use the labelled 7.72 reconstruction catalogue. Ultimate Healing starts at the requested 420-mana baseline; the linked reconstruction lists 400. Your server-specific settings take precedence in every batch result.</p>
+      <p>Rune items, charges, casts and backpack capacity remain separate. One cast is modelled as one rune item. Maximum mana is estimated assuming vocation selection at level 8 unless you enter an actual value.</p>
+      <p>The mana recovery time is a resource estimate, not a complete production timer: spell delays, interruptions and qualifying soul recovery can add time. A known soul cost of zero removes the soul constraint; an unknown cost does not.</p>
+      <p><External href={baseRecipe.sourceUrl}>Selected rune reference</External> · <External href={SOURCES.soul}>Soul mechanics reference</External></p>
     </Evidence>
   </>;
 }

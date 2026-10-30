@@ -4,6 +4,8 @@ export interface Character {
   level: number; xp: number; xpEstimated: boolean; percentRemaining: number;
   magicLevel: number; magicPercentRemaining: number; goalML: number;
   meleeSkill: number; distanceSkill: number; shieldingSkill: number; fishingSkill: number;
+  /** Named weapon skills; older journals inherit their shared melee value. */
+  axeSkill?: number; swordSkill?: number; clubSkill?: number; fistSkill?: number;
   premium: boolean; maxMana?: number; maxHP?: number; capacity?: number;
 }
 export interface ServerProfile {
@@ -26,6 +28,11 @@ export interface Offer {
   price: number; enabled: boolean; serverId?: string; sourcePresetId?: string | null; notes?: string;
 }
 export interface OfferOverride { price?: number; enabled?: boolean; notes?: string }
+/** Server-specific spell learning and rune creation settings. Null retains an explicitly unknown value. */
+export interface SpellOverride {
+  mana?: number | null; runeCharges?: number | null; soulCost?: number | null;
+  price?: number | null; vocations?: Exclude<Vocation, 'unselected'>[] | null;
+}
 /** Quantities and personal reserves are always base item counts. */
 export interface StockLot {
   id: string; characterId: string; itemId: string; quantity: number; personalReserve: number;
@@ -69,6 +76,7 @@ export interface AppState {
   characters: Character[]; servers: ServerProfile[]; items: Item[]; npcs: NPC[]; offers: Offer[];
   itemOverrides: Record<string, Partial<Item>>; npcOverrides: Record<string, Partial<NPC>>;
   offerOverrides: Record<string, OfferOverride>;
+  spellOverrides?: Record<string, SpellOverride>;
   lots: StockLot[]; orders: Order[]; movements: StockMovement[]; backpacks: Backpack[];
   hunts: HuntSession[]; bookmarks: Bookmark[]; favourites: string[];
   preferences: Record<string, unknown>;

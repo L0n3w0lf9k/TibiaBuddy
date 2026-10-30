@@ -1,6 +1,7 @@
 import type { AppState } from '../types';
 import { checkXP, levelForXP, MAX_LEVEL } from './xp';
 import { catalogOffers, overrideKey } from './catalog';
+import { spells } from '../data/game';
 
 type DataRecord = Record<string, unknown>;
 const MAX_RECORDS = 100_000;
@@ -64,11 +65,12 @@ function npcFields(npc: DataRecord, where: string, partial: boolean) {
 export function validateBackup(data: unknown): asserts data is AppState {
   object(data, 'journal');
   if (data.schemaVersion !== 1) fail('schema version', 'is not supported; use a version 1 Tibia Buddy backup.');
-  whitelist(data, ['schemaVersion', 'revision', 'activeCharacterId', 'characters', 'servers', 'items', 'npcs', 'offers', 'itemOverrides', 'npcOverrides', 'offerOverrides', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks', 'favourites', 'preferences'], 'journal');
+  whitelist(data, ['schemaVersion', 'revision', 'activeCharacterId', 'characters', 'servers', 'items', 'npcs', 'offers', 'itemOverrides', 'npcOverrides', 'offerOverrides', 'spellOverrides', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks', 'favourites', 'preferences'], 'journal');
   integer(data.revision, 'revision'); id(data.activeCharacterId, 'active character');
   const listKeys = ['characters', 'servers', 'items', 'npcs', 'offers', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks'] as const;
   for (const key of listKeys) keyedList(data[key], key);
   for (const key of ['itemOverrides', 'npcOverrides', 'offerOverrides', 'preferences']) object(data[key], key);
+  if (data.spellOverrides !== undefined) object(data.spellOverrides, 'spell overrides');
   stringList(data.favourites, 'favourites');
   const s = data as unknown as AppState;
   const characters = new Map(s.characters.map(c => [c.id, c])), servers = new Map(s.servers.map(x => [x.id, x])), items = new Map(s.items.map(x => [x.id, x])), npcs = new Map(s.npcs.map(x => [x.id, x])), offers = new Map(s.offers.map(x => [x.id, x])), lots = new Map(s.lots.map(x => [x.id, x])), backpacks = new Map(s.backpacks.map(x => [x.id, x]));
@@ -90,6 +92,7 @@ export function validateBackup(data: unknown): asserts data is AppState {
     if (levelForXP(c.xp) !== c.level) fail('character level', 'does not match the saved experience.');
     numeric(c.percentRemaining, 'level progress', 0, 100); numeric(c.magicPercentRemaining, 'magic progress', 0, 100);
     for (const field of ['magicLevel', 'goalML', 'meleeSkill', 'distanceSkill', 'shieldingSkill', 'fishingSkill'] as const) integer(c[field], 'character ' + field, 0, 10_000);
+    for (const field of ['axeSkill', 'swordSkill', 'clubSkill', 'fistSkill'] as const) if (c[field] !== undefined) integer(c[field], 'character ' + field, 0, 10_000);
     for (const field of ['maxMana', 'maxHP', 'capacity'] as const) if (c[field] !== undefined) numeric(c[field], 'character ' + field);
   }
   for (const item of s.items) {
@@ -123,6 +126,22 @@ export function validateBackup(data: unknown): asserts data is AppState {
   checkOverrides(s.itemOverrides, items, 'item', ['name', 'aliases', 'category', 'image', 'weight', 'attack', 'defense', 'armor', 'charges', 'packSize', 'source']);
   checkOverrides(s.npcOverrides, npcs, 'NPC', ['name', 'city', 'x', 'y', 'z', 'notes']);
   checkOverrides(s.offerOverrides, offers, 'offer', ['price', 'enabled', 'notes']);
+  const spellIds = new Set(spells.map(spell => spell.id));
+  for (const [key, value] of Object.entries(s.spellOverrides ?? {})) {
+    const [serverId, spellId, extra] = key.split('::');
+    if (extra !== undefined || !servers.has(serverId) || !spellIds.has(spellId)) fail('spell override', 'has an invalid server/spell key.');
+    object(value, 'spell override');
+    whitelist(value, ['mana', 'runeCharges', 'soulCost', 'price', 'vocations'], 'spell override');
+    optionalNumber(value.mana, 'spell mana', true);
+    optionalNumber(value.soulCost, 'spell soul cost', true);
+    optionalNumber(value.runeCharges, 'rune charges', true, 1);
+    optionalNumber(value.price, 'spell learning price');
+    if (value.vocations !== undefined && value.vocations !== null) {
+      array(value.vocations, 'spell vocations');
+      const known = new Set(['knight', 'paladin', 'sorcerer', 'druid']);
+      if (value.vocations.some(v => typeof v !== 'string' || !known.has(v)) || new Set(value.vocations).size !== value.vocations.length) fail('spell vocations', 'must contain distinct classic vocations.');
+    }
+  }
   if (s.servers.length * s.offers.length > 5_000_000) fail('merchant catalogue', 'contains too many server/offer combinations.');
   for (const server of s.servers) {
     const activeOffers = new Set<string>();
@@ -236,6 +255,7 @@ export function validateBackup(data: unknown): asserts data is AppState {
   }
   jsonValue(s.preferences, 'preferences');
   for (const [key, value] of Object.entries(s.preferences)) {
+    if (key === 'theme' && !['light', 'dark', 'system'].includes(String(value))) fail('appearance', 'must be light, dark, or system.');
     if (key === 'xpCreatureIds' || key.startsWith('xpCreatureIds:')) stringList(value, 'selected creatures');
     if (key.startsWith('xpCreatureIds:') && !characters.has(key.slice('xpCreatureIds:'.length))) fail('selected-creature preference', 'has no character owner.');
     if (key.startsWith('mapPosition:')) { if (!characters.has(key.slice('mapPosition:'.length))) fail('saved map position', 'has no character owner.'); object(value, 'saved map position'); integer(value.x, 'saved map X', 0, 65535); integer(value.y, 'saved map Y', 0, 65535); integer(value.z, 'saved map Z', 0, 15); integer(value.zoom, 'saved map zoom', 1, 8); }

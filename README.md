@@ -21,11 +21,23 @@ Anything placed in `src/` or `public/` can become public in the compiled website
 
 ## Physical skill planner
 
-Training → Physical skills estimates axe, sword, club, fist, distance and shielding goals for all four classic vocations. Enter the attained skill, percentage still remaining, target skill, and one, two or three incoming creatures. Each server has a separate physical skill multiplier; older backups without it use 1×.
+Training → Physical skills estimates a weapon goal and a separate shielding goal together for all four classic vocations. Axe, sword, club, fist and distance use their own saved profile skills. Enter each attained skill, percentage still remaining and target, then choose one, two or three incoming creatures. Both goals run concurrently: the session ends when the longer goal is reached. Each server has a separate physical skill multiplier; older backups without it use 1×.
 
 The visible estimate assumes a fixed two-second cycle and uninterrupted qualifying training. Shielding requires an equipped shield and counts at most two eligible incoming melee checks per cycle. Additional creatures do not increase the outgoing weapon attack rate. Periodic outgoing HP damage must keep the shared learning allowance active; one attempted attack every cycle does not by itself guarantee continuous advancement. Distance is explicitly a perfect-landed-shot lower bound.
 
 Requirements come from the labeled public 7.72 reconstruction linked in the calculator. Cumulative geometric thresholds are evaluated with exact rational factors and rounded down, remaining progress is rounded up, and time is rounded to whole cycles across the entire goal. This avoids independently rounding each level's duration and preserves excess progress between levels. Promotion does not change the physical skill curve in this model. These are conditional estimates, not independent certification of every original 7.7 mechanic or a promise of a specific server's results.
+
+## Character, spell and food settings
+
+The character dialog keeps its draft while switching experience modes. Save, the close button, Escape and a genuine backdrop click save valid edits; Cancel discards them. Invalid fields keep the dialog open. Saves merge only edited fields so an unchanged dialog cannot overwrite newer XP or skills saved in another tab. Old journals and backups gain separate axe, sword and club values from their former melee value, preserving the other records.
+
+Rune creation mana, charges and soul, plus spell learning prices and vocation availability, can be edited in the spellbook, Edron tower or rune planner. These are browser-local overrides keyed by server and spell. Rune production uses the same effective values, including an explicit zero soul cost. UH's application preset is 420 mana; the source notes retain the reconstruction's differing 400-mana value. Restoring reference defaults clears only that spell's overrides on the selected server.
+
+Food comparisons cover planned nourishment hours, a magic-level goal's natural mana recovery, or a rune batch's recovery. The modal compares 23 foods, shows the ten lightest total loads initially, rounds quantities up and includes total weight, coverage and surplus. A food selection changes only that plan's food. Prices remain user-entered rather than assumed.
+
+The combat overview displays 84 melee weapons and all 21 supported Legacy spell/rune calculations, alphabetized within melee, attack spells, healing spells, damage runes and healing runes. Melee uses the matching named skill. The linked Legacy calculator is branded 7.4, so these remain labeled comparison estimates rather than certified 7.7 final damage. Unsupported actions and mitigation are not fabricated.
+
+Light, dark and device-following themes are available in Settings; the header button switches light/dark directly. The preference is part of the journal backup. A small local preference cache applies the theme before the app opens.
 
 ## Local development
 
@@ -103,3 +115,5 @@ After a deployment, check `/healthz`, load the website, open a creature with a s
 The app distinguishes historical evidence, reconstructed server data, and calculator estimates. Inspect the in-app source details before treating a server-specific value as an exact Tibia 7.7 rule. Merchant prices start from the Fibula reference and can be adjusted for the visitor's server.
 
 Tibia game graphics are © CipSoft GmbH. Classic sprite references are sourced from [Primibia's 7.72 wiki](https://primibia.com/wiki); this identifies the source's claimed version rather than independently authenticating every image as a 7.7 asset. Tibia Buddy is an independent companion and is not affiliated with CipSoft or Primibia. The game graphics do not inherit a license from the application's code or its UI icon library.
+
+Colored backpack sprites and modern instant-spell artwork are sourced from [Tibia Wiki Brasil](https://www.tibiawiki.com.br/). They supply visuals only; modern gameplay values are not imported. Retired-spell illustrations and successor-icon mappings are identified in the artwork metadata. The files in `public/assets/*/manifest.json` retain provenance, retrieval details, dimensions and hashes. Game artwork remains © CipSoft GmbH.
