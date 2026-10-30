@@ -1,0 +1,123 @@
+/* Supporting text stays readable at every breakpoint without scaling headings. */
+.stat-top,
+.card .stat-top {
+  align-items: flex-start;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.stat-top > span { min-width: 0; }
+.stat-top svg { margin-top: 1px; }
+
+.stat > small,
+.card .stat > small {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.text-button,
+.character-plan {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.dashboard-empty p,
+.empty-state p,
+.character-summary p {
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.character-progress > div:first-child,
+.character-progress > div:first-child > span,
+.character-progress > small,
+.character-skills span,
+.recent-row span,
+.supply-preview-row span,
+.supply-preview-row strong small,
+.field-guide-card small {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.character-skills span { font-weight: 500; }
+.character-skills > div { min-width: 0; }
+.character-summary > div:last-child { min-width: 0; }
+.character-summary p { overflow-wrap: anywhere; }
+.dashboard-grid .section-heading { flex-wrap: wrap; row-gap: 10px; }
+.dashboard-grid .section-heading .inline { min-width: 0; }
+.field-guide-card > button > span:nth-child(2) { min-width: 0; }
+.field-guide-card .guide-icon { flex-shrink: 0; }
+
+.recent-row strong,
+.supply-preview-row strong,
+.field-guide-card strong {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* The same labels and hints appear throughout forms and calculators. */
+.field > span,
+.field > small,
+.helper,
+.section-heading p,
+.table-footnote,
+.detail-grid span,
+.profile-form-intro p,
+.timer-metric span,
+.timer-metric small,
+.progress-labels {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.field input,
+.field select,
+.field textarea { font-size: 14px; }
+
+/* Source notes and saved-link controls should be as legible as other card text. */
+.guides-source,
+.guides-context,
+.guides-select-label > span,
+.guides-results-line,
+.guides-text-button,
+.guides-open,
+.guides-editor .field > span,
+.guides-editor .field > small,
+.guides-source-note p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.guides-description { font-size: 14px; }
+.guides-context,
+.guides-source,
+.guides-select-label > span,
+.guides-source-note p,
+.guides-editor .field > small { color: var(--text-soft); }
+
+.guides-version,
+.guides-language,
+.guides-vocations > span,
+.guides-card-footnote,
+.guides-card-footnote a { font-size: 12px; }
+
+@media (max-width: 430px) {
+  body { min-width: 0; }
+  .dashboard-stats { gap: 10px; }
+  .dashboard-stats .stat { padding: 14px; }
+  .stat-top { gap: 7px; }
+  .character-skills { column-gap: 8px; }
+  .character-skills > div { padding-inline: 6px; }
+  .guides-card footer { flex-wrap: wrap; row-gap: 12px; }
+  .guides-card-actions { margin-left: auto; }
+}
