@@ -32,6 +32,13 @@ export function activeSeconds(session: HuntSession, at = Date.now()): number {
   if (session.durationOverride !== undefined) return session.durationOverride;
   return session.intervals.reduce((sum, i) => sum + Math.max(0, Math.min(i.end ?? at, at) - i.start) / 1000, 0);
 }
+export function manualHuntTiming(startedAt: number, minutes: number) {
+  const seconds = minutes * 60, stoppedAt = startedAt + seconds * 1000;
+  if (!Number.isFinite(seconds) || seconds <= 0) throw new Error('Enter a positive active duration.');
+  if (!Number.isFinite(new Date(startedAt).getTime())) throw new Error('Choose a valid date.');
+  if (!Number.isFinite(new Date(stoppedAt).getTime())) throw new Error('This duration is too large. Enter a shorter hunt.');
+  return { seconds, stoppedAt };
+}
 export function huntMetrics(session: HuntSession, at = Date.now()) {
   const seconds = activeSeconds(session, at);
   const checkpoint = session.checkpoints.at(-1);

@@ -1,12 +1,12 @@
 .combat-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
 .combat-profile-grid .field{margin:0}
-.combat-profile-summary{display:flex;flex-wrap:wrap;gap:12px 25px;margin:22px 0 14px;padding-top:17px;border-top:1px solid var(--line)}
-.combat-profile-summary>span{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
-.combat-profile-summary strong{color:var(--text);font-variant-numeric:tabular-nums}
+.combat-preview-hint{margin:18px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
 .combat-overview{display:flex;flex-direction:column;gap:22px}
 .combat-overview>.notice,.combat-overview>.evidence{margin:0}
 .combat-jump-links{display:flex;flex-wrap:wrap;gap:9px}
 .combat-jump-links .btn{font-size:11px}
+.combat-weapon-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:18px 22px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.combat-weapon-settings .field{margin:0}
 .combat-section{scroll-margin-top:22px}
 .combat-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:21px 22px 16px}
 .combat-section-heading h2{margin:0 0 5px;font-size:17px;display:flex;align-items:center;gap:8px}
@@ -14,31 +14,29 @@
 .combat-section-heading .badge{flex:none;margin-top:3px}
 .combat-weapon-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:0 22px 16px}
 .combat-weapon-controls .search-box{flex:1;min-width:180px}
-.combat-weapon-controls>select{width:auto;min-width:130px}
+.combat-weapon-controls>select{width:auto;min-width:150px}
 .combat-weapon-scroll{max-height:440px;overflow:auto;border-top:1px solid var(--line)}
 .combat-weapon-scroll .data-table th{position:sticky;top:0;z-index:1;background:var(--surface-alt)}
 .combat-spell-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;align-items:start}
 .combat-spell-grid>.panel{min-width:0}
-.combat-spell-table .data-table th,.combat-spell-table .data-table td{padding:12px 15px}
-.combat-spell-table .data-table th:first-child,.combat-spell-table .data-table td:first-child{min-width:190px}
+.combat-spell-table .data-table th,.combat-spell-table .data-table td{padding:12px}
+.combat-spell-table .data-table th:first-child,.combat-spell-table .data-table td:first-child{min-width:180px}
+.combat-spell-table .data-table th:last-child,.combat-spell-table .data-table td:last-child{min-width:120px}
 .combat-action{display:flex;gap:10px;align-items:center;min-width:0}
 .combat-action>div{min-width:0}
 .combat-action strong{display:block;line-height:1.45}
 .combat-incantation{display:block;color:var(--muted);font-size:10px;line-height:1.45;margin-top:3px}
-.combat-result{display:block;font-size:16px!important;white-space:nowrap;font-variant-numeric:tabular-nums}
-.combat-result-unit{display:block;color:var(--muted);font-size:9px;margin-top:2px}
+.combat-effect-note{display:block;font-size:10px;line-height:1.5;margin-top:4px;color:var(--text);font-weight:600}
+.data-table .combat-number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.data-table td.combat-number>strong{font-size:15px}
 .combat-requirement{display:flex;align-items:center;gap:6px;margin-top:5px;color:var(--muted)}
 .combat-requirement .badge{margin-left:0}
-.combat-inspect{display:inline-flex;gap:5px;align-items:center;padding:5px 0;background:none;border:0;color:var(--green);font-size:10px;text-align:left}
-.combat-inspect:hover{text-decoration:underline}
-.combat-table-footer{padding:13px 20px;border-top:1px solid var(--line);font-size:10px;color:var(--muted);line-height:1.6;margin:0}
-.combat-unmodeled{display:flex;gap:16px;align-items:flex-start;background:var(--surface-alt);border:1px solid var(--line);border-radius:9px;padding:18px 20px}
-.combat-unmodeled>svg{color:var(--muted);flex:none;margin-top:2px}
-.combat-unmodeled h3{margin:0 0 7px;font-size:13px}
-.combat-unmodeled p{font-size:11px;color:var(--muted);margin:0 0 10px;line-height:1.65}
-.combat-weapon-setup{padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--surface-alt)}
-.combat-weapon-setup h3{margin:0 0 16px}
-.combat-requirement-messages p{margin-bottom:9px;font-size:12px}
-.combat-source-link{font-size:10px;color:var(--green)}
+.combat-table-footer{padding:13px 20px;border-top:1px solid var(--line);font-size:10px;color:var(--muted);line-height:1.7;margin:0}
+.combat-distance-notes p{margin:0 0 8px;font-size:11px}
+.combat-distance-notes p:last-child{margin-bottom:0}
+.combat-distance-notes strong{color:var(--text)}
+.combat-source-link{font-size:9px;color:var(--green);line-height:1.4;display:inline-block;margin-top:3px}
+.combat-fist-icon{display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:none;color:var(--muted)}
+.combat-evidence-links{display:flex;flex-wrap:wrap;gap:8px 17px}
 @media(max-width:1120px){.combat-spell-grid{grid-template-columns:1fr}.combat-profile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:720px){.combat-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px}.combat-profile-summary{gap:11px 18px}.combat-profile-summary>span{font-size:11px}.combat-jump-links{gap:7px}.combat-jump-links .btn{font-size:10px;padding:8px}.combat-section-heading{padding:18px 17px 13px}.combat-section-heading h2{font-size:15px}.combat-weapon-controls{padding:0 17px 14px}.combat-weapon-controls .search-box{flex-basis:100%}.combat-weapon-controls>select{flex:1}.combat-spell-table .data-table th,.combat-spell-table .data-table td{padding:12px}.combat-spell-table .data-table th:first-child,.combat-spell-table .data-table td:first-child{min-width:175px}.combat-result{font-size:14px!important}.combat-unmodeled{padding:16px;gap:12px}.combat-table-footer{padding:12px 17px}.combat-overview{gap:18px}}
+@media(max-width:720px){.combat-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 12px}.combat-weapon-settings{grid-template-columns:1fr;gap:16px;padding:17px}.combat-jump-links{gap:7px}.combat-jump-links .btn{font-size:10px;padding:8px}.combat-section-heading{padding:18px 17px 13px}.combat-section-heading h2{font-size:15px}.combat-weapon-controls{padding:0 17px 14px}.combat-weapon-controls .search-box{flex-basis:100%}.combat-weapon-controls>select{flex:1}.combat-spell-table .data-table th,.combat-spell-table .data-table td{padding:12px}.combat-spell-table .data-table th:first-child,.combat-spell-table .data-table td:first-child{min-width:175px}.combat-table-footer{padding:12px 17px}.combat-overview{gap:18px}.combat-distance-table .data-table th:first-child{min-width:205px}.combat-distance-table .data-table th:last-child{min-width:155px}}

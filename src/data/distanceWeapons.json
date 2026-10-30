@@ -1,0 +1,188 @@
+{
+  "source": "https://primibia.com/wiki/items",
+  "version": "7.72 community reconstruction",
+  "retrievedOn": "2026-10-30",
+  "description": "Observed ammunition and distance-weapon property tables. Physical attack is separate from poison/burst special effects. Launcher identity and effect handling are interpreted separately from pinned reconstruction code.",
+  "items": [
+    {
+      "id": "arrow",
+      "name": "Arrow",
+      "sourceUrl": "https://primibia.com/wiki/items/arrow",
+      "properties": {
+        "Category": "Ammunition",
+        "Attack": "25",
+        "Weight": "0.7 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "39fa37a553aa78e0e40dbad7299207e31265f60a31927073eb4d358a8239c92b"
+    },
+    {
+      "id": "bolt",
+      "name": "Bolt",
+      "sourceUrl": "https://primibia.com/wiki/items/bolt",
+      "properties": {
+        "Category": "Ammunition",
+        "Attack": "30",
+        "Weight": "0.8 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "f6ad36b58dc8484b9860a46ec75bdc7ebdcb8ca1fdf3db86ce30388d348a3795"
+    },
+    {
+      "id": "bow",
+      "name": "Bow",
+      "sourceUrl": "https://primibia.com/wiki/items/bow",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Slot": "Two-Handed",
+        "Range": "6",
+        "Weight": "31 oz",
+        "Stackable": "no",
+        "Loot value": "130 gp"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "7fd75747778f1efc4a83ef6d4859272f372a84d48bc312a465735e1963286f05"
+    },
+    {
+      "id": "burst-arrow",
+      "name": "Burst Arrow",
+      "sourceUrl": "https://primibia.com/wiki/items/burst-arrow",
+      "properties": {
+        "Category": "Ammunition",
+        "Attack": "0",
+        "Weight": "0.9 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "ef2420dcc4aead404aa46eb9499b32346609b6666d9b86b871d1f71bdaa490c7"
+    },
+    {
+      "id": "crossbow",
+      "name": "Crossbow",
+      "sourceUrl": "https://primibia.com/wiki/items/crossbow",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Slot": "Two-Handed",
+        "Range": "5",
+        "Weight": "40 oz",
+        "Stackable": "no",
+        "Loot value": "160 gp"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "3c877bc874badbd5b860c08c4f611aabad9f1de5c3145ff8a0df50a05d31ef4e"
+    },
+    {
+      "id": "poison-arrow",
+      "name": "Poison Arrow",
+      "sourceUrl": "https://primibia.com/wiki/items/poison-arrow",
+      "properties": {
+        "Category": "Ammunition",
+        "Attack": "10",
+        "Weight": "0.8 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "37ed3f89d320f342e754af0848a684d2e5d367872c331312e2f6f06d82545e1b"
+    },
+    {
+      "id": "power-bolt",
+      "name": "Power Bolt",
+      "sourceUrl": "https://primibia.com/wiki/items/power-bolt",
+      "properties": {
+        "Category": "Ammunition",
+        "Attack": "40",
+        "Weight": "0.9 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "8d1c3ed91d82b7f289ba2b32efaf31bec78c0b2efb0f2f8a4627ac7e95a411b2"
+    },
+    {
+      "id": "small-stone",
+      "name": "Small Stone",
+      "sourceUrl": "https://primibia.com/wiki/items/small-stone",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Attack": "10",
+        "Defense": "0",
+        "Range": "7",
+        "Weight": "3.6 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "22217dd03ef68eba487dd40aecf48cde7b056fadab078464363edeb5ee1b6693"
+    },
+    {
+      "id": "snowball",
+      "name": "Snowball",
+      "sourceUrl": "https://primibia.com/wiki/items/snowball",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Attack": "0",
+        "Defense": "0",
+        "Range": "7",
+        "Weight": "0.8 oz",
+        "Stackable": "yes",
+        "Loot value": "—"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "70986db263b89f50ea9857281b5c3c28ce3138663e09b619fdad163d917f4814"
+    },
+    {
+      "id": "spear",
+      "name": "Spear",
+      "sourceUrl": "https://primibia.com/wiki/items/spear",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Attack": "25",
+        "Defense": "0",
+        "Range": "7",
+        "Weight": "20 oz",
+        "Stackable": "yes",
+        "Loot value": "3 gp"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "af5c23fbfd002a72fb46da28cbaa4aa27ca6df3e858daeaa9755a21bad95ea0c"
+    },
+    {
+      "id": "throwing-knife",
+      "name": "Throwing Knife",
+      "sourceUrl": "https://primibia.com/wiki/items/throwing-knife",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Attack": "25",
+        "Defense": "0",
+        "Range": "7",
+        "Weight": "5 oz",
+        "Stackable": "yes",
+        "Loot value": "2 gp"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "a475de43df65477f5aa27f31f4fd55b38d9f70d905dd3350ff9cb7b717510584"
+    },
+    {
+      "id": "throwing-star",
+      "name": "Throwing Star",
+      "sourceUrl": "https://primibia.com/wiki/items/throwing-star",
+      "properties": {
+        "Category": "Distance Weapons",
+        "Attack": "35",
+        "Defense": "0",
+        "Range": "7",
+        "Weight": "2 oz",
+        "Stackable": "yes",
+        "Loot value": "2 gp"
+      },
+      "sourceVersion": "Primibia 7.72 reconstruction",
+      "sourceSha256": "8681a26e2083d902baa1df8d2836cee5507da9708a2d716b7251924f40c22b17"
+    }
+  ]
+}

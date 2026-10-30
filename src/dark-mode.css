@@ -110,3 +110,13 @@ html[data-theme="dark"] .recent-row:hover{background:var(--surface-alt)}
 html[data-theme="dark"] :is(.character-skills>div,.character-plan,.supply-preview-row,.field-guide-card>button,.section-heading,.recent-hunts,.modal-heading,.form-section,.modal-actions,.backup-grid>div+div,.server-row){border-color:var(--line)}
 
 html[data-theme="dark"] :is(.tabs,.data-table th,.data-table td){border-color:var(--line)}
+
+/* Align each column consistently across both character-skill rows. */
+.character-skills>div{text-align:left;padding-inline:10px}
+.character-skills>div:nth-child(3n+1){padding-left:0}
+.character-skills>div:nth-child(3n){border-right:0}
+html[data-theme="dark"] .field-guide-card>button{background:var(--surface);color:var(--text)}
+html[data-theme="dark"] .field-guide-card>button:hover{background:var(--surface-alt)}
+html[data-theme="dark"] .field-guide-card>button:focus-visible{outline:2px solid var(--focus);outline-offset:-3px;background:var(--surface-alt)}
+.appearance-card>.field{max-width:420px}
+.appearance-card>p.helper{margin-bottom:0}

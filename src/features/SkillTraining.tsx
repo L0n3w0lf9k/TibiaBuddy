@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Clock3, Hand, RotateCcw, Shield, Swords, Target, Users } from 'lucide-react';
+import { Clock3, Hand, RotateCcw, Settings2, Shield, Swords } from 'lucide-react';
 import { useApp } from '../context';
 import ItemSprite from '../components/ItemSprite';
-import { Badge, Evidence, External, Field, Notice, Stat, duration, number } from '../shared';
+import { Badge, Evidence, External, Field, Notice, duration, number } from '../shared';
 import { PHYSICAL_SKILLS, SKILL_SOURCES, type SkillTrainingPlan } from '../domain/skills';
 import { characterSkill } from '../domain/characterSkills';
 import { simultaneousSkillTraining, type TrainingGoal, type WeaponSkill } from '../domain/trainingPlans';
@@ -44,15 +44,14 @@ function StepTable({ title, plan }: { title: string; plan: SkillTrainingPlan | n
 }
 
 export default function SkillTraining({ vocation, promoted }: { vocation: Vocation; promoted: boolean }) {
-  const { character, server } = useApp();
+  const { character, server, navigate } = useApp();
   const [skill, setSkill] = useState<WeaponSkill>(character.vocation === 'paladin' ? 'distance' : 'sword');
   const [weaponGoals, setWeaponGoals] = useState(() => initialWeaponGoals(character));
   const [shieldGoal, setShieldGoal] = useState(() => initialGoal(character, 'shielding'));
-  const [attackers, setAttackers] = useState<1 | 2 | 3>(2);
-  const [skillRate, setSkillRate] = useState(server.skillRate ?? 1);
+  const [attackers, setAttackers] = useState<1 | 2>(2);
+  const skillRate = server.skillRate ?? 1;
   useEffect(() => { setWeaponGoals(initialWeaponGoals(character)); setShieldGoal(initialGoal(character, 'shielding')); },
     [character.id, character.meleeSkill, character.axeSkill, character.swordSkill, character.clubSkill, character.fistSkill, character.distanceSkill, character.shieldingSkill]);
-  useEffect(() => setSkillRate(server.skillRate ?? 1), [server.id, server.skillRate]);
   const weaponGoal = weaponGoals[skill];
   const selected = weaponSkills.find(item => item.id === skill)!;
   const editWeapon = (patch: Partial<TrainingGoal>) => setWeaponGoals(previous => ({ ...previous, [skill]: { ...previous[skill], ...patch } }));
@@ -64,60 +63,38 @@ export default function SkillTraining({ vocation, promoted }: { vocation: Vocati
   }
   const weapon = combined?.weapon ?? null, shielding = combined?.shielding ?? null;
   return <div className="training-updates">
-    <div className="training-intro"><div><h2>Train your weapon and shield together</h2><p className="muted">Two independent goals, one session. Outgoing attacks train your combat skill while incoming melee attacks train shielding.</p></div><Badge>Temporary preview</Badge></div>
+    <div className="training-intro"><div><h2>Train your weapon and shield together</h2><p className="muted">Set a goal for each skill. Both train during the same session.</p></div><div className="training-intro-tools"><Badge>Temporary preview</Badge><button className="text-button" onClick={() => navigate('settings')}><Settings2 size={14} />Server settings</button></div></div>
     <div className="grid-2">
       <section className="card training-goal-card">
         <div className="toolbar"><div className="item-with-sprite">{illustrations[skill] ? <ItemSprite name={illustrations[skill]} /> : <Hand size={26} />}<h2>Outgoing combat skill</h2></div><Swords size={19} /></div>
         <Field label="Weapon skill"><select value={skill} onChange={event => setSkill(event.target.value as WeaponSkill)}>{weaponSkills.map(item => <option value={item.id} key={item.id}>{item.label}</option>)}</select></Field>
+        <p className="training-inline-note"><Clock3 size={14} /><span>One outgoing attack every <strong>2 seconds</strong>.</span></p>
         <GoalInputs label={selected.label.replace(' fighting', '').toLowerCase()} goal={weaponGoal} onChange={editWeapon} />
         <button className="btn btn-ghost" onClick={() => editWeapon(initialGoal(character, skill))}><RotateCcw size={14} />Use profile: {number(characterSkill(character, skill))}</button>
-        <p className="muted">Each weapon keeps its own preview inputs. The starting value comes from that skill in your character profile.</p>
         <div className="training-goal-result"><span>{selected.label} goal</span><strong>{trainingTime(weapon?.idealSeconds)}</strong><small>{weapon ? `${points(weapon.requiredTries)} points · ${points(weapon.triesPerHour)} points/hour` : 'Choose valid goals to calculate.'}</small></div>
       </section>
       <section className="card training-goal-card">
         <div className="toolbar"><div className="item-with-sprite"><ItemSprite name="Wooden Shield" /><h2>Shielding alongside it</h2></div><Shield size={19} /></div>
-        <p className="muted">Set your actual shielding progress and target separately from your weapon skill. Keep a shield equipped.</p>
+        <Field label="Creatures attacking you" hint="Incoming melee attacks affect shielding only."><select value={attackers} onChange={event => setAttackers(Number(event.target.value) as 1 | 2)}><option value={1}>1 creature</option><option value={2}>2 creatures</option></select></Field>
+        <p className="training-inline-note"><Shield size={14} /><span>Keep a shield equipped. Up to two eligible defenses per 2-second cycle.</span></p>
         <GoalInputs label="shielding" goal={shieldGoal} onChange={patch => setShieldGoal(previous => ({ ...previous, ...patch }))} />
         <button className="btn btn-ghost" onClick={() => setShieldGoal(initialGoal(character, 'shielding'))}><RotateCcw size={14} />Use profile: {number(character.shieldingSkill)}</button>
         <div className="training-goal-result"><span>Shielding goal</span><strong>{trainingTime(shielding?.idealSeconds)}</strong><small>{shielding ? `${points(shielding.requiredTries)} points · ${points(shielding.triesPerHour)} points/hour` : 'Choose valid goals to calculate.'}</small></div>
       </section>
     </div>
-    <section className="card"><div className="toolbar"><h2>Shared training session</h2><Users size={20} /></div>
-      <div className="form-grid">
-        <Field label="Creatures attacking you" hint="Changes shielding opportunities; your outgoing attack rate stays the same."><select value={attackers} onChange={event => setAttackers(Number(event.target.value) as 1 | 2 | 3)}><option value={1}>1 creature</option><option value={2}>2 creatures</option><option value={3}>3 creatures</option></select></Field>
-        <Field label="Classic attack cycle" hint="One outgoing attack every 2 seconds; each creature makes one melee attempt in that cycle."><input type="text" value="2 seconds" readOnly /></Field>
-        <Field label="Server skill rate" hint={`${server.name}: ×${number(server.skillRate ?? 1, 2)}. Changes here are a temporary preview.`}><Numeric value={skillRate} onChange={setSkillRate} min={0.01} max={1000} step={0.01} /></Field>
-      </div>
-      <Notice><strong>Active learning is required.</strong> Periodically deal HP damage to refresh the shared learning allowance. Every swing need not draw blood. Shielding counts at most two eligible defenses per cycle, so a third creature does not speed up shielding.</Notice>
-      {skill === 'distance' && <p className="muted">Distance assumes every shot lands, granting two training points while learning is active. Armor may absorb HP damage; misses can award fewer points. Use a shield-compatible setup to train shielding alongside it.</p>}
-      {(weaponGoal.percentRemaining === 0 || shieldGoal.percentRemaining === 0) && <p className="muted">A displayed 0% may be rounded. This preview treats it as zero remaining in that interval without changing the attained skill.</p>}
-    </section>
     {vocation === 'unselected' && <Notice>Choose a calculator vocation above to calculate both goals.</Notice>}
     {error && <Notice tone="warning">{error}</Notice>}
-    <div className="stat-grid training-combined-stats">
-      <Stat label={`${selected.label} target`} value={trainingTime(weapon?.idealSeconds)} detail={`${number(weaponGoal.currentLevel)} → ${number(weaponGoal.targetLevel)} · one outgoing attack per cycle`} icon={<Target size={18} />} />
-      <Stat label="Shielding target" value={trainingTime(shielding?.idealSeconds)} detail={`${number(shieldGoal.currentLevel)} → ${number(shieldGoal.targetLevel)} · ${Math.min(attackers, 2)} eligible shield checks per cycle`} icon={<Shield size={18} />} />
-      <Stat label="Time until both goals" value={trainingTime(combined?.bothGoalsSeconds)} detail="The longer goal determines the session; these times are not added." icon={<Clock3 size={18} />} tone="green" />
+    <div className="training-assumptions">
+      <p className="muted">Ideal times assume continuous training and periodic outgoing HP damage to keep learning active. Every swing need not draw blood.</p>
+      {skill === 'distance' && <p className="muted">Distance assumes landed shots for two points per shot; misses can earn fewer. Train shielding with a shield-compatible setup.</p>}
+      {(weaponGoal.percentRemaining === 0 || shieldGoal.percentRemaining === 0) && <p className="muted">A displayed 0% may be rounded. This preview treats it as zero remaining in that interval.</p>}
     </div>
-    <section className="card"><div className="toolbar"><h2>Compare incoming attackers</h2><Badge>Same two goals</Badge></div>
-      <p className="muted">Your weapon goal keeps the same time in all three setups. Shielding can progress twice as fast with two attackers, then reaches its defense ceiling.</p>
-      <div className="training-attacker-grid">{([1, 2, 3] as const).map(count => {
-        const comparison = combined?.attackers.find(item => item.attackers === count);
-        return <section className={'training-attacker-card ' + (count === attackers ? 'selected' : '')} key={count}>
-          <div className="toolbar"><h3>{count} {count === 1 ? 'creature' : 'creatures'}</h3>{count === attackers && <Badge>Selected</Badge>}</div>
-          <dl><div><dt>{selected.label}</dt><dd>{trainingTime(comparison?.weaponSeconds)}</dd></div><div><dt>Shielding</dt><dd>{trainingTime(comparison?.shieldingSeconds)}</dd></div><div className="training-combined-line"><dt>Both goals</dt><dd>{trainingTime(comparison?.bothGoalsSeconds)}</dd></div></dl>
-          <p className="muted">{count === 1 ? 'One eligible shield check per cycle.' : count === 2 ? 'Two eligible checks: shielding ceiling.' : 'Same shielding ceiling as two creatures.'}</p>
-          <button className="btn" disabled={count === attackers} onClick={() => setAttackers(count)}>{count === attackers ? 'In this plan' : 'Use this setup'}</button>
-        </section>;
-      })}</div>
-    </section>
     <div className="grid-2"><StepTable title={`${selected.label} steps`} plan={weapon} /><StepTable title="Shielding steps" plan={shielding} /></div>
-    <p className="muted">Promotion keeps the same physical advancement curves. These are continuous-training estimates; positioning, interruptions, and an exhausted learning allowance can increase actual time. Calculator changes do not overwrite your saved skills.</p>
     <Evidence>
-      <p><strong>{weapon?.modelLabel || 'Classic 7.72 reconstruction estimate'}</strong>. Both goals use the same vocation and server skill rate. Full attack cycles are counted, with remaining progress applied separately to each goal.</p>
+      <p><strong>{weapon?.modelLabel || 'Classic 7.72 reconstruction estimate'}</strong>. Both goals use the same vocation and the saved server skill rate (×{number(skillRate, 2)}). Full two-second cycles are counted, with remaining progress applied separately to each goal. Promotion keeps the same physical advancement curves.</p>
       <p>The learning budget has 30 points and is refreshed by outgoing HP damage. Weapon probes and eligible shield probes consume it. More incoming checks can require more frequent HP-damaging hits even though weapon swing speed remains unchanged.</p>
-      {SKILL_SOURCES.map(source => <p key={source.id}><External href={source.url}>{source.title}</External><br />{source.note}</p>)}
-      <p>Fishing is not part of this combat-cycle planner. Exact behavior on a particular server can differ from the reconstruction.</p>
+      {SKILL_SOURCES.map(source => <p key={source.id}><External href={source.url}>{source.title}</External><br />{source.id === 'skill-cadence' ? 'The reconstruction defaults attack and defense intervals to 2,000 ms. This page uses that fixed cadence and assumes one incoming melee attempt per creature per cycle.' : source.note}</p>)}
+      <p>Interruptions, positioning, and exhausted learning points can increase actual time. Preview changes do not overwrite saved skills. Fishing is separate, and individual servers can differ from this reconstruction.</p>
     </Evidence>
   </div>;
 }

@@ -1,0 +1,11 @@
+.hunt-history .table-wrap{overflow:auto}
+.hunt-checkpoints{min-width:820px}
+.hunt-checkpoints .hunt-elapsed{font-variant-numeric:tabular-nums;white-space:nowrap}
+.hunt-checkpoints time{white-space:nowrap;color:var(--muted)}
+.hunt-checkpoint-hint{display:flex;gap:10px;align-items:center;margin:18px 22px 0;color:var(--muted);font-size:12px}
+.hunt-checkpoint-hint svg{flex:none;color:var(--green)}
+.hunt-history .table-footnote{line-height:1.7}
+.modal:has(.hunt-history){width:1020px}
+.modal .hunt-history{margin-top:24px}
+.modal .hunt-history .table-footnote{padding-left:0;padding-right:0}
+@media(max-width:650px){.hunt-checkpoint-hint{margin-left:18px;margin-right:18px;align-items:flex-start}.hunt-checkpoints{min-width:780px}}

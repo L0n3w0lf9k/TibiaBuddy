@@ -1,7 +1,8 @@
 import type { AppState } from '../types';
-import { checkXP, levelForXP, MAX_LEVEL } from './xp';
+import { activeSeconds, checkXP, levelForXP, MAX_LEVEL } from './xp';
 import { catalogOffers, overrideKey } from './catalog';
 import { spells } from '../data/game';
+import { normalizeGuideUrl } from './guides';
 
 type DataRecord = Record<string, unknown>;
 const MAX_RECORDS = 100_000;
@@ -65,14 +66,28 @@ function npcFields(npc: DataRecord, where: string, partial: boolean) {
 export function validateBackup(data: unknown): asserts data is AppState {
   object(data, 'journal');
   if (data.schemaVersion !== 1) fail('schema version', 'is not supported; use a version 1 Tibia Buddy backup.');
-  whitelist(data, ['schemaVersion', 'revision', 'activeCharacterId', 'characters', 'servers', 'items', 'npcs', 'offers', 'itemOverrides', 'npcOverrides', 'offerOverrides', 'spellOverrides', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks', 'favourites', 'preferences'], 'journal');
+  whitelist(data, ['schemaVersion', 'revision', 'activeCharacterId', 'characters', 'servers', 'items', 'npcs', 'offers', 'itemOverrides', 'npcOverrides', 'offerOverrides', 'spellOverrides', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks', 'guideLinks', 'favourites', 'preferences'], 'journal');
   integer(data.revision, 'revision'); id(data.activeCharacterId, 'active character');
   const listKeys = ['characters', 'servers', 'items', 'npcs', 'offers', 'lots', 'orders', 'movements', 'backpacks', 'hunts', 'bookmarks'] as const;
   for (const key of listKeys) keyedList(data[key], key);
   for (const key of ['itemOverrides', 'npcOverrides', 'offerOverrides', 'preferences']) object(data[key], key);
   if (data.spellOverrides !== undefined) object(data.spellOverrides, 'spell overrides');
+  if (data.guideLinks !== undefined) keyedList(data.guideLinks, 'guide links');
   stringList(data.favourites, 'favourites');
   const s = data as unknown as AppState;
+  for (const guide of s.guideLinks ?? []) {
+    object(guide, 'guide');
+    whitelist(guide, ['id', 'title', 'url', 'description', 'kind', 'vocations', 'versionLabel', 'createdAt', 'updatedAt'], 'guide');
+    string(guide.title, 'guide title', true); string(guide.url, 'guide URL', true);
+    string(guide.description, 'guide description'); string(guide.versionLabel, 'guide version');
+    if (guide.title.length > 160 || guide.url.length > 2048 || guide.description.length > 1000 || guide.versionLabel.length > 100) fail('guide', 'contains text beyond the supported length.');
+    try { normalizeGuideUrl(guide.url); } catch { fail('guide URL', 'must be an http/https link without credentials or control characters.'); }
+    if (!['article', 'video', 'reference'].includes(guide.kind)) fail('guide kind', 'is unsupported.');
+    array(guide.vocations, 'guide vocations');
+    if (guide.vocations.some(v => !['knight', 'paladin', 'sorcerer', 'druid'].includes(v)) || new Set(guide.vocations).size !== guide.vocations.length) fail('guide vocations', 'must contain distinct classic vocations.');
+    eventDate(guide.createdAt, 'guide creation time'); eventDate(guide.updatedAt, 'guide update time');
+    if (!guide.createdAt.includes('T') || !guide.updatedAt.includes('T')) fail('guide timestamps', 'must include a time and timezone.');
+  }
   const characters = new Map(s.characters.map(c => [c.id, c])), servers = new Map(s.servers.map(x => [x.id, x])), items = new Map(s.items.map(x => [x.id, x])), npcs = new Map(s.npcs.map(x => [x.id, x])), offers = new Map(s.offers.map(x => [x.id, x])), lots = new Map(s.lots.map(x => [x.id, x])), backpacks = new Map(s.backpacks.map(x => [x.id, x]));
   if (!characters.size || !characters.has(s.activeCharacterId)) fail('active character', 'does not exist.');
   const belongsToServer = (entity: { serverId?: string } | undefined, serverId: string) => Boolean(entity && (!entity.serverId || entity.serverId === serverId));
@@ -245,6 +260,7 @@ export function validateBackup(data: unknown): asserts data is AppState {
     for (const cp of hunt.checkpoints) {
       timestamp(cp.at, 'checkpoint time'); checkXP(cp.xp); numeric(cp.activeSeconds, 'checkpoint active time');
       if (cp.at < previousCheckpoint || cp.activeSeconds < previousSeconds || (hunt.stoppedAt !== null && cp.at > hunt.stoppedAt)) fail('XP checkpoints', 'are outside the hunt or out of order.');
+      if (cp.activeSeconds > activeSeconds(hunt, cp.at) + 0.000001) fail('checkpoint active time', 'exceeds the recorded hunt duration at that checkpoint.');
       previousCheckpoint = cp.at; previousSeconds = cp.activeSeconds;
     }
     if (hunt.status !== 'completed') { if (activeCharacters.has(hunt.characterId)) fail('hunts', 'contain more than one unfinished session for a character.'); activeCharacters.add(hunt.characterId); }

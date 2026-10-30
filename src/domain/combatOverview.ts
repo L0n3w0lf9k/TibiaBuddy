@@ -1,7 +1,9 @@
 import weaponData from '../data/meleeWeapons.json';
+import distanceData from '../data/distanceWeapons.json';
 import { spells, type SpellRecord } from '../data/game';
 import { catalogItems, overrideKey } from './catalog';
-import { meleePeak, SPELL_MODELS, spellRange, type SpellModel } from './mechanics';
+import { SPELL_MODELS, spellRange, type SpellModel } from './mechanics';
+import { CLASSIC_COMBAT_SOURCES, classicBurstRange, classicDistanceAccuracy, classicWeaponRange, type AttackMode, type ProjectileKind } from './classicCombat';
 import type { CombatSkill } from './characterSkills';
 import type { AppState, Character, Item } from '../types';
 
@@ -109,13 +111,14 @@ export function spellRequirementCheck(model: SpellModel, reference: SpellRecord 
 
 export interface MeleeOverviewRow extends Omit<MeleeWeaponReference, 'attack'> {
   attack: number | null;
+  rawMinimum: number | null;
   inputSkill: number;
   rawMaximum: number | null;
   catalogItemId?: string;
   attackSource: 'reference' | 'catalog' | 'override';
 }
 
-function matchingItem(reference: MeleeWeaponReference, items: Item[], state: AppState) {
+function matchingItem(reference: { id: string }, items: Item[], state: AppState) {
   const key = normalized(reference.id);
   const exact = items.find(item => normalized(item.id.replace(/^fibula:item:/, '')) === key);
   if (exact) return exact;
@@ -126,7 +129,7 @@ function matchingItem(reference: MeleeWeaponReference, items: Item[], state: App
 }
 
 /** Known weapon classes come from source properties, never a guess based on an item's name. */
-export function meleeOverview(state: AppState, serverId: string, skills: CombatSkillInputs): MeleeOverviewRow[] {
+export function meleeOverview(state: AppState, serverId: string, skills: CombatSkillInputs, mode: AttackMode = 'offensive'): MeleeOverviewRow[] {
   const items = catalogItems(state, serverId);
   return MELEE_WEAPONS.map(reference => {
     const item = matchingItem(reference, items, state);
@@ -135,10 +138,91 @@ export function meleeOverview(state: AppState, serverId: string, skills: CombatS
     const attackSource = attackEdited ? 'override' : item?.attack != null ? 'catalog' : 'reference';
     const attack = attackEdited ? item?.attack ?? null : item?.attack ?? reference.attack;
     const inputSkill = skills[reference.skill];
-    const rawMaximum = Number.isInteger(inputSkill) && inputSkill >= 0 && inputSkill <= 300
-      && attack !== null && Number.isFinite(attack) && attack > 0 && attack <= 1000
-      ? meleePeak(inputSkill, attack) : null;
-    return { ...reference, name: item?.name ?? reference.name, attack, inputSkill, rawMaximum,
+    const range = attack === null ? null : classicWeaponRange(inputSkill, attack, mode);
+    return { ...reference, name: item?.name ?? reference.name, attack, inputSkill,
+      rawMinimum: range?.min ?? null, rawMaximum: range?.max ?? null,
       catalogItemId: item?.id, attackSource } as MeleeOverviewRow;
+  }).sort((a, b) => alphabetical.compare(a.name, b.name));
+}
+
+export interface FistOverviewRow extends Omit<MeleeOverviewRow, 'skill' | 'sourceSha256'> { skill: 'fist' }
+
+/** Human race attack7 is documented in the linked investigator's human.mon excerpt. */
+export function fistOverview(skill: number, mode: AttackMode = 'offensive'): FistOverviewRow {
+  const range = classicWeaponRange(skill, 7, mode);
+  return { id: 'bare-hands', name: 'Bare hands', skill: 'fist', attack: 7, inputSkill: skill,
+    rawMinimum: range?.min ?? null, rawMaximum: range?.max ?? null, attackSource: 'reference',
+    sourceUrl: CLASSIC_COMBAT_SOURCES.fist, sourceVersion: 'RealOTS human race-data investigation' };
+}
+
+export function closeCombatOverview(state: AppState, serverId: string, skills: CombatSkillInputs, mode: AttackMode = 'offensive') {
+  return [...meleeOverview(state, serverId, skills, mode), fistOverview(skills.fist, mode)]
+    .sort((a, b) => alphabetical.compare(a.name, b.name));
+}
+
+export interface DistanceWeaponReference {
+  id: string;
+  name: string;
+  attack: number;
+  kind: ProjectileKind;
+  launcher: 'Bow' | 'Crossbow' | null;
+  maxRange: number;
+  effect: 'none' | 'poison' | 'burst';
+  sourceUrl: string;
+  sourceVersion: string;
+  sourceSha256: string;
+  rangeSourceUrl: string;
+}
+
+const launcherFor = (id: string) => ['bolt', 'power-bolt'].includes(id) ? 'crossbow' : 'bow';
+
+export const DISTANCE_WEAPONS: DistanceWeaponReference[] = distanceData.items
+  .filter(item => item.properties.Attack !== undefined)
+  .map(item => {
+    const kind: ProjectileKind = item.properties.Category === 'Ammunition' ? 'launcher' : 'thrown';
+    const launcher = kind === 'launcher' ? distanceData.items.find(candidate => candidate.id === launcherFor(item.id)) : undefined;
+    return { id: item.id, name: item.name, attack: Number(item.properties.Attack), kind,
+      launcher: launcher?.name as 'Bow' | 'Crossbow' | undefined ?? null,
+      maxRange: Number((launcher ?? item).properties.Range),
+      effect: item.id === 'burst-arrow' ? 'burst' as const : item.id === 'poison-arrow' ? 'poison' as const : 'none' as const,
+      sourceUrl: item.sourceUrl, sourceVersion: item.sourceVersion, sourceSha256: item.sourceSha256,
+      rangeSourceUrl: (launcher ?? item).sourceUrl,
+    };
+  }).sort((a, b) => alphabetical.compare(a.name, b.name));
+
+export interface DistanceOverviewRow extends Omit<DistanceWeaponReference, 'attack'> {
+  attack: number | null;
+  inputSkill: number;
+  rawMinimum: number | null;
+  rawMaximum: number | null;
+  physicalMinimum: number | null;
+  physicalMaximum: number | null;
+  /** Poison's additional damage is excluded; Burst's displayed range is its explosion. */
+  specialEffectModelled: boolean;
+  accuracy: number | null;
+  outOfRange: boolean;
+  catalogItemId?: string;
+  attackSource: 'reference' | 'catalog' | 'override';
+}
+
+export function distanceOverview(state: AppState, serverId: string, skill: number, tiles: number,
+  mode: AttackMode = 'offensive', burstInputs?: { level: number; magicLevel: number }): DistanceOverviewRow[] {
+  const items = catalogItems(state, serverId);
+  return DISTANCE_WEAPONS.map(reference => {
+    const item = matchingItem(reference, items, state);
+    const override = item ? state.itemOverrides[overrideKey(serverId, item.id)] : undefined;
+    const attackEdited = override !== undefined && Object.hasOwn(override, 'attack');
+    const attackSource = attackEdited ? 'override' : item?.attack != null ? 'catalog' : 'reference';
+    const attack = attackEdited ? item?.attack ?? null : item?.attack ?? reference.attack;
+    const range = attack === null ? null : classicWeaponRange(skill, attack, mode);
+    const explosion = reference.effect === 'burst' && burstInputs ? classicBurstRange(burstInputs.level, burstInputs.magicLevel) : null;
+    return { ...reference, name: item?.name ?? reference.name, attack, inputSkill: skill,
+      rawMinimum: reference.effect === 'burst' ? explosion?.min ?? null : range?.min ?? null,
+      rawMaximum: reference.effect === 'burst' ? explosion?.max ?? null : range?.max ?? null,
+      physicalMinimum: range?.min ?? null, physicalMaximum: range?.max ?? null,
+      specialEffectModelled: reference.effect === 'none' || (reference.effect === 'burst' && explosion !== null),
+      accuracy: classicDistanceAccuracy(skill, tiles, reference.kind, reference.maxRange),
+      outOfRange: Number.isInteger(tiles) && tiles > reference.maxRange,
+      catalogItemId: item?.id, attackSource } as DistanceOverviewRow;
   }).sort((a, b) => alphabetical.compare(a.name, b.name));
 }

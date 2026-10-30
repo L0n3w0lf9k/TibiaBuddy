@@ -10,7 +10,7 @@ The production service is one static website. A Node build compiles the React/Ty
 | --- | --- | --- |
 | Creature, spell, item, food, and merchant reference information | Application bundle built from `src/data/` and domain modules | Update the source, review its evidence, and deploy a new build |
 | Game sprites and other public assets | `public/`, copied into the deployed static files | Replace/add assets and deploy a new build |
-| Character profiles, stock, orders, hunts, goals, and settings | The visitor's browser IndexedDB, using Dexie | Saved locally as the visitor uses the site |
+| Character profiles, stock, orders, hunts, goals, personal guide links, and settings | The visitor's browser IndexedDB, using Dexie | Saved locally as the visitor uses the site |
 | Exported user backup | A JSON file downloaded by the visitor | Export/restore through the app's Settings page |
 
 There is no application database service, account service, user-data API, upload endpoint, or attached volume. The web server serves files and a healthcheck; it does not receive or persist the app's character records, inventory, orders, or hunt history. Normal hosting request logs may still contain ordinary HTTP request information. The external map and source links use their respective third-party services when opened.
@@ -21,7 +21,7 @@ Anything placed in `src/` or `public/` can become public in the compiled website
 
 ## Physical skill planner
 
-Training → Physical skills estimates a weapon goal and a separate shielding goal together for all four classic vocations. Axe, sword, club, fist and distance use their own saved profile skills. Enter each attained skill, percentage still remaining and target, then choose one, two or three incoming creatures. Both goals run concurrently: the session ends when the longer goal is reached. Each server has a separate physical skill multiplier; older backups without it use 1×.
+Training → Physical skills estimates a weapon goal and a separate shielding goal together for all four classic vocations. Axe, sword, club, fist and distance use their own saved profile skills. Enter each attained skill, percentage still remaining and target, then choose one or two incoming creatures in the shielding card. Both goals run concurrently. Server Settings holds the separate experience, physical skill, magic progress and regeneration multipliers; the planner uses the saved physical skill rate directly. Older backups without it use 1×.
 
 The visible estimate assumes a fixed two-second cycle and uninterrupted qualifying training. Shielding requires an equipped shield and counts at most two eligible incoming melee checks per cycle. Additional creatures do not increase the outgoing weapon attack rate. Periodic outgoing HP damage must keep the shared learning allowance active; one attempted attack every cycle does not by itself guarantee continuous advancement. Distance is explicitly a perfect-landed-shot lower bound.
 
@@ -35,9 +35,23 @@ Rune creation mana, charges and soul, plus spell learning prices and vocation av
 
 Food comparisons cover planned nourishment hours, a magic-level goal's natural mana recovery, or a rune batch's recovery. The modal compares 23 foods, shows the ten lightest total loads initially, rounds quantities up and includes total weight, coverage and surplus. A food selection changes only that plan's food. Prices remain user-entered rather than assumed.
 
-The combat overview displays 84 melee weapons and all 21 supported Legacy spell/rune calculations, alphabetized within melee, attack spells, healing spells, damage runes and healing runes. Melee uses the matching named skill. The linked Legacy calculator is branded 7.4, so these remain labeled comparison estimates rather than certified 7.7 final damage. Unsupported actions and mitigation are not fabricated.
-
 Light, dark and device-following themes are available in Settings; the header button switches light/dark directly. The preference is part of the journal backup. A small local preference cache applies the theme before the app opens.
+
+## Combat results
+
+The combat calculator is one results page with 84 melee weapons, bare hands, 10 classic distance projectiles and all 21 supported Legacy spell/rune calculations, alphabetized within each group. All weapon rows show raw minimum and maximum damage. Melee uses the matching axe, sword or club skill; bare hands use fist fighting with reconstructed human base attack 7. Ordinary weapon ranges and projectile accuracy follow a pinned public 7.72 reconstruction. The linked Legacy calculator is branded 7.4, so its retained spell/rune formulas have a separate source label.
+
+The weapon model applies integer attack-mode adjustments, then the source's two-roll random factor. Its raw minimum is zero and it adds no modern character-level damage bonus. Projectile accuracy uses base distance skill and tile distance, with separate launcher and thrown-weapon checks. It describes the projectile check before mitigation, not the chance to remove HP. The literal reconstructed inclusive comparisons produce 91% and 76% caps; the UI identifies this source-dependent result and does not silently substitute conventional 90% and 75% descriptions.
+
+Burst Arrow is separate: the classic reconstructed explosion uses `0…floor(60 × (2 × level + 3 × magic level) / 100)`, independent of distance skill and attack mode. The pinned [TVP script](https://github.com/joseluis2g/TVP-primeiro/blob/05b92a5bf0fba85e4a5d6f000ec736eef3be6ce6/gameserver/data/scripts/weapons/burst_arrow.lua) supplies base damage 30 and variation 30, and the old engine supplies the level/magic multiplier. [CipSoft's June 2007 announcement](https://www.tibia.com/news/?id=528&subtopic=newsarchive) documents the later move to distance-scaled Burst damage. Its projectile check is not a probability for splash damage: the inspected engine also explodes the arrow after a miss. The old `exevo con flam` reference produces Burst Arrow; a separate modern elemental Fire Arrow is not added to the classic catalog.
+
+These are raw reconstruction estimates. Armor, immunities, PvP reductions, obstacle geometry, poison over time and server customizations can change actual results. Damage distributions and unsupported actions are not invented. Pinned sources and implementation notes are linked in the calculator and `src/domain/classicCombat.ts`.
+
+## Hunt checkpoints and online guides
+
+While a hunt is active, its checkpoint history replaces the completed journal. Each row records total XP, active hunt time, wall-clock recording time, gain since the preceding record and that interval's XP/hour. The first checkpoint uses the hunt's starting XP; pauses are excluded. Previously recorded rates remain fixed while the timer runs. Completed-hunt details retain the same history and append the final interval. XP losses are recorded, and zero-duration intervals display no rate.
+
+Online Guides includes version-labelled videos, written guides and vocation references. Search, vocation/format filters and favourites cover both curated entries and personal links. Visitors can add, edit and remove their own HTTP(S) links with an Undo action. Links are shared across their local characters and included in JSON backups; older backups migrate to an empty personal collection. Videos open on YouTube rather than loading third-party embeds. The initial set distinguishes 7.7 recordings, 7.72 reconstructions and earlier 7.4 guide context.
 
 ## Local development
 

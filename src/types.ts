@@ -71,6 +71,14 @@ export interface HuntSession {
 export interface Bookmark {
   id: string; characterId: string; name: string; x: number; y: number; z: number; zoom: number; notes: string;
 }
+export type GuideKind = 'article' | 'video' | 'reference';
+/** Personal reference links are shared by all characters on this device. */
+export interface GuideLink {
+  id: string; title: string; url: string; description: string; kind: GuideKind;
+  /** An empty list means relevant to every vocation. */
+  vocations: Exclude<Vocation, 'unselected'>[];
+  versionLabel: string; createdAt: string; updatedAt: string;
+}
 export interface AppState {
   schemaVersion: 1; revision: number; activeCharacterId: string;
   characters: Character[]; servers: ServerProfile[]; items: Item[]; npcs: NPC[]; offers: Offer[];
@@ -79,6 +87,7 @@ export interface AppState {
   spellOverrides?: Record<string, SpellOverride>;
   lots: StockLot[]; orders: Order[]; movements: StockMovement[]; backpacks: Backpack[];
   hunts: HuntSession[]; bookmarks: Bookmark[]; favourites: string[];
+  guideLinks?: GuideLink[];
   preferences: Record<string, unknown>;
 }
 export interface AppContextValue {

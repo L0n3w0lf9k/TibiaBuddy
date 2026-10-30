@@ -26,6 +26,7 @@ test('named skills and server customizations survive repeat migrations', () => {
   const state = makeTestState();
   Object.assign(state.characters[0], { axeSkill: 81, swordSkill: 42, clubSkill: 17, fistSkill: 19 });
   state.spellOverrides = { 'test-server::ultimate-healing-rune': { mana: 420, soulCost: 0 } };
+  state.guideLinks = [];
   const result = upgradeJournal(state);
   assert.equal(result.changed, false);
   assert.equal(characterSkill(result.state.characters[0], 'axe'), 81);

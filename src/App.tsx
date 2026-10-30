@@ -16,8 +16,9 @@ import Library from './features/Library';
 import WorldMap from './features/WorldMap';
 import Settings from './features/Settings';
 import Profile, { vocationLabel } from './features/Profile';
+import Guides from './features/Guides';
 
-const nav=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'hunts',label:'Hunts & experience',icon:Timer},{id:'supplies',label:'Stock & orders',icon:Package},{id:'training',label:'Training & food',icon:FlaskConical},{id:'combat',label:'Combat calculator',icon:Swords},{id:'library',label:'Creature & spell library',icon:BookOpen},{id:'merchants',label:'Merchants',icon:Coins},{id:'map',label:'World map',icon:Map}];
+const nav=[{id:'overview',label:'Overview',icon:LayoutDashboard},{id:'hunts',label:'Hunts & experience',icon:Timer},{id:'supplies',label:'Stock & orders',icon:Package},{id:'training',label:'Training & food',icon:FlaskConical},{id:'combat',label:'Combat calculator',icon:Swords},{id:'library',label:'Creature & spell library',icon:BookOpen},{id:'guides',label:'Online guides',icon:Compass},{id:'merchants',label:'Merchants',icon:Coins},{id:'map',label:'World map',icon:Map}];
 const getPath=()=>window.location.hash.replace(/^#\/?/,'').split('?')[0]||'overview';
 export default function App(){
   const [state,setState]=useState<AppState|null>(null),[loadError,setLoadError]=useState(''),[path,setPath]=useState(getPath),[mobile,setMobile]=useState(false),[profile,setProfile]=useState<'edit'|'create'|null>(null),[saving,setSaving]=useState(0);
@@ -34,7 +35,7 @@ export default function App(){
   if(!state)return <div className="boot-screen"><Compass size={46}/><h1>Tibia Buddy</h1><p>Opening your adventure journal…</p><LoaderCircle className="spinner" size={22}/></div>;
   const character=state.characters.find(c=>c.id===state.activeCharacterId)??state.characters[0], server=state.servers.find(s=>s.id===character.serverId)??state.servers[0];
   const p=xpProgress(character.xp),activeHunt=state.hunts.find(h=>h.characterId===character.id&&h.status!=='completed');
-  const screens:Record<string,ReactNode>={overview:<Overview/>,hunts:<Hunts/>,supplies:<Supplies/>,training:<Training/>,combat:<Combat/>,library:<Library/>,merchants:<Merchants/>,map:<WorldMap/>,settings:<Settings/>};
+  const screens:Record<string,ReactNode>={overview:<Overview/>,hunts:<Hunts/>,supplies:<Supplies/>,training:<Training/>,combat:<Combat/>,library:<Library/>,guides:<Guides/>,merchants:<Merchants/>,map:<WorldMap/>,settings:<Settings/>};
   return <AppContext.Provider value={{state,character,server,update,notify,navigate,openProfile:()=>setProfile('edit')}}><a className="skip-link" href="#main-content">Skip to content</a><div className="app-shell">
     {mobile&&<button className="sidebar-scrim" aria-label="Close navigation" onClick={()=>setMobile(false)}/>}
     <aside className={'sidebar '+(mobile?'open':'')}><a className="brand" href="#/overview" onClick={()=>setMobile(false)}><span className="brand-mark"><Compass size={28} strokeWidth={1.5}/></span><span>Tibia<span className="brand-light">Buddy</span><small>THE ADVENTURER'S COMPANION</small></span></a><div className="sidebar-rule"/>

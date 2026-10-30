@@ -10,17 +10,10 @@
 .training-goal-result>span,.training-goal-result>strong,.training-goal-result>small{display:block}
 .training-goal-result>span,.training-goal-result>small{color:var(--muted)}
 .training-goal-result>strong{font-size:26px;color:var(--text);line-height:1.4;margin:4px 0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.training-combined-stats{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
-.training-attacker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.training-attacker-card{min-width:0;border:1px solid var(--line);border-radius:9px;padding:17px;background:var(--surface-alt,#f6f8f3)}
-.training-attacker-card.selected{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
-.training-attacker-card>.toolbar{padding:0;align-items:flex-start;gap:8px}
-.training-attacker-card h3{margin:0}.training-attacker-card dl{margin:16px 0}
-.training-attacker-card dl>div{display:flex;justify-content:space-between;gap:12px;margin:10px 0;align-items:baseline}
-.training-attacker-card dt{font-size:11px;color:var(--muted)}
-.training-attacker-card dd{font-size:13px;font-weight:600;color:var(--text);margin:0;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.training-attacker-card .training-combined-line{border-top:1px solid var(--line);padding-top:12px}
-.training-attacker-card p{font-size:11px;line-height:1.6;min-height:35px}.training-attacker-card>.btn{width:100%}
+.training-intro-tools{display:flex;flex-direction:column;align-items:flex-end;gap:12px;flex-shrink:0}
+.training-inline-note{display:flex;align-items:flex-start;gap:7px;font-size:11px;line-height:1.6;color:var(--muted)}
+.training-inline-note>svg{margin-top:2px}.training-inline-note strong{font-weight:600;color:var(--text)}
+.training-assumptions{display:flex;flex-direction:column;gap:7px}.training-assumptions p{margin:0;font-size:12px}
 .training-step-scroll{overflow:auto;max-height:330px}.training-step-scroll th{position:sticky;top:0}
 .training-food-goal{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:22px 0}
 .training-food-goal h2{margin:0}.training-food-goal p{margin:10px 0 0;max-width:600px;font-size:12px}
@@ -45,8 +38,8 @@
 .rune-settings-summary>.btn{flex:none}.rune-settings-summary .item-with-sprite{align-items:flex-start}
 .rune-production-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:22px 0}
 .rune-resources-table{overflow:auto}.rune-resources-table table{min-width:540px}
-@media(max-width:1120px){.training-goal-fields{grid-template-columns:1fr}.training-attacker-grid{gap:10px}.training-attacker-card{padding:14px}.training-attacker-card dl>div{display:block}.training-attacker-card dd{text-align:left;margin-top:4px}}
-@media(max-width:960px){.training-goal-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.training-attacker-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.rune-production-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:720px){.training-intro{flex-direction:column;gap:12px}.training-goal-fields{grid-template-columns:1fr}.training-combined-stats,.training-attacker-grid{grid-template-columns:1fr}.training-attacker-card dl>div{display:flex}.training-attacker-card dd{text-align:right;margin:0}.training-attacker-card p{min-height:0}.training-food-goal{flex-direction:column;align-items:stretch;gap:18px}.training-food-selection{min-width:0}.food-comparison-summary{align-items:flex-start;padding:13px}.food-comparison-controls{gap:12px}.food-comparison-controls>.field{flex-basis:100%}.food-show-all{padding-bottom:0}.food-comparison-controls>.badge{margin-bottom:0}.rune-settings-summary{align-items:flex-start;flex-direction:column}.rune-settings-summary>.btn{align-self:flex-start}.rune-production-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1120px){.training-goal-fields{grid-template-columns:1fr}}
+@media(max-width:960px){.training-goal-fields{grid-template-columns:repeat(3,minmax(0,1fr))}.rune-production-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.training-intro{flex-direction:column;gap:12px}.training-goal-fields{grid-template-columns:1fr}.training-intro-tools{flex-direction:row;align-items:center;flex-wrap:wrap;gap:15px}.training-food-goal{flex-direction:column;align-items:stretch;gap:18px}.training-food-selection{min-width:0}.food-comparison-summary{align-items:flex-start;padding:13px}.food-comparison-controls{gap:12px}.food-comparison-controls>.field{flex-basis:100%}.food-show-all{padding-bottom:0}.food-comparison-controls>.badge{margin-bottom:0}.rune-settings-summary{align-items:flex-start;flex-direction:column}.rune-settings-summary>.btn{align-self:flex-start}.rune-production-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .modal.wide:has(.food-comparison-summary){width:980px}
