@@ -1,4 +1,5 @@
 import type { GuideDraft } from '../domain/guides';
+import { classicGuides } from './classicGuides';
 
 export interface CuratedGuide extends GuideDraft {
   id: string;
@@ -16,6 +17,7 @@ export interface CuratedGuide extends GuideDraft {
  * the videos have not been exhaustively reviewed for every tactic or server setting.
  */
 export const curatedGuides: CuratedGuide[] = [
+  ...classicGuides,
   {
     id: 'curated-dark-cathedral-77', title: 'Dark Cathedral: a complete level 24 hunt',
     url: 'https://www.youtube.com/watch?v=hd9TuibVH4o', kind: 'video', vocations: [],
