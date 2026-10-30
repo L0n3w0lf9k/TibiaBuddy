@@ -39,7 +39,10 @@ export function magicMultiplier(vocation: Vocation): number | null {
   return vocation === 'knight' ? 3 : vocation === 'paladin' ? 1.4 : vocation === 'unselected' ? null : 1.1;
 }
 
-/** Direct formula, intentionally unrounded. Historic integer rounding is unresolved. */
+/** Direct estimate for current attained ML -> current + 1. At ML0 the step is 1,600.
+ * Tables indexed by the level being reached put this cost on row current + 1.
+ * Integer rounding differs between classic implementations; do not round earlier rows recursively.
+ */
 export function magicStepMana(current: number, vocation: Vocation): number | null {
   const b = magicMultiplier(vocation);
   if (b === null || !whole(current) || current > 200) return null;

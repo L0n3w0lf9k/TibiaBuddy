@@ -121,7 +121,7 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
       <section className="card">
         <div className="toolbar"><h2>Your next magic level</h2><Badge tone="blue">Estimate</Badge></div>
         <div className="form-grid">
-          <Field label="Current attained magic level"><Numeric value={current} onChange={setCurrent} max={200} /></Field>
+          <Field label="Current attained magic level" hint="The magic level you already have, before your next advancement."><Numeric value={current} onChange={setCurrent} max={200} /></Field>
           <Field label="Percent remaining to next ML" hint="Use the percentage still needed, not the percentage completed."><Numeric value={remaining} onChange={setRemaining} max={100} step={0.1} /></Field>
           <Field label="Target magic level"><Numeric value={target} onChange={setTarget} max={200} /></Field>
         </div>
@@ -136,7 +136,7 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
         <div className="stat-grid">
           <Stat label="Mana to target" value={plan ? '≈ ' + quantity(plan.mana) : '—'} detail="Mana actually spent at your server’s ML rate" icon={<Sparkles size={17} />} />
           <Stat label="Fed regeneration time" value={plan ? longDuration(plan.seconds) : '—'} detail="Assumes continuous spending and feeding" icon={<Clock3 size={17} />} />
-          <Stat label="Mana to the next ML" value={plan ? '≈ ' + quantity(plan.remainingNextStepMana) : '—'} detail={`${number(remaining, 1)}% remaining in the current step`} />
+          <Stat label={plan ? `Mana for ML ${number(current)} → ${number(current + 1)}` : 'Mana to the next ML'} value={plan ? '≈ ' + quantity(plan.remainingNextStepMana) : '—'} detail={plan ? `${number(remaining, 1)}% of ≈ ${quantity(plan.nextStepMana)} mana for the full step` : `${number(remaining, 1)}% remaining in the current step`} />
           <Stat label="Vocation growth factor" value={magicMultiplier(vocation) === null ? '—' : '×' + magicMultiplier(vocation)} detail={`Server magic progress ×${number(server.magicRate, 2)}`} />
         </div>
         <p className="muted">Promotion changes the regeneration time, not the vocation’s mana requirement. Food alone does not raise magic level.</p>
@@ -170,8 +170,8 @@ function MagicView({ vocation, promoted }: { vocation: Vocation; promoted: boole
       </section>
     </div>
     <Evidence>
-      <p>The model uses 1,600 × vocation factor<sup>current attained ML</sup>, summing the remaining part of the current step and the full later steps. It evaluates the formula directly; it does not repeatedly round earlier spreadsheet rows.</p>
-      <p>Historic integer rounding remains unresolved. Results are estimates, including when the displayed answer rounds to a whole mana point. The June 2006 fixture is Knight ML3 → 4: 43,200 mana, or 36 fed hours at 2 mana / 6 seconds.</p>
+      <p>The model uses 1,600 × vocation factor<sup>current attained ML</sup>, summing the remaining part of the current step and the full later steps. Your current ML is the level already attained: ML43 advances to ML44, using exponent 43. A table labelled by the level being reached puts that advancement on row 44.</p>
+      <p>The formula is evaluated directly. Repeatedly rounding earlier spreadsheet rows accumulates a different total. Results remain estimates because client percentages can be rounded and classic server implementations can differ slightly in integer rounding. The June 2006 fixture is Knight ML3 → 4: 43,200 mana, or 36 fed hours at 2 mana / 6 seconds.</p>
       <p><External href={SOURCES.knight}>Contemporary knight fixture</External> · <External href={SOURCES.magic}>2006 formula discussion</External> · <External href={SOURCES.rounding}>Rounding uncertainty</External></p>
     </Evidence>
   </>;

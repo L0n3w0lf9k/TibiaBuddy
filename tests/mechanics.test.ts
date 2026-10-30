@@ -21,6 +21,22 @@ test('promotion changes regeneration, not mage mana requirement', () => {
   assert.equal(regeneration('paladin', true)?.manaPerHour, 2400);
 });
 
+test('attained mage ML43 with 85% to go uses the 43→44 advancement', () => {
+  for (const vocation of ['druid', 'sorcerer'] as const) {
+    const plan = magicPlan({ current: 43, target: 44, remainingPercent: 85, vocation, promoted: true })!;
+    // The period table's destination-ML44 row is approximately 96,384 mana.
+    assert.equal(Math.round(plan.nextStepMana), 96384);
+    assert.ok(Math.abs(plan.mana - 81926.49405928966) < 1e-6);
+    assert.equal(Math.round(plan.mana), 81926);
+    assert.equal(plan.remainingNextStepMana, plan.mana);
+    assert.deepEqual(plan.steps.map(step => [step.from, step.to, step.fraction]), [[43, 44, 0.85]]);
+    assert.equal(magicStepMana(0, vocation), 1600);
+    assert.ok(Math.abs(magicStepMana(1, vocation)! - 1760) < 1e-6);
+  }
+  const previous = magicPlan({ current: 42, target: 43, remainingPercent: 85, vocation: 'druid', promoted: true })!;
+  assert.ok(Math.abs(previous.mana - 74478.63096299059) < 1e-6);
+});
+
 test('partial ML progress targets the next step without recurrent rounding', () => {
   const plan = magicPlan({ current: 17, target: 20, remainingPercent: 37.5, vocation: 'druid', promoted: true })!;
   assert.ok(Math.abs(plan.mana - 21714.00434432966) < 1e-6);
