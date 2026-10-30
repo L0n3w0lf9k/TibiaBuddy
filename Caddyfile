@@ -1,0 +1,41 @@
+{
+	admin off
+	persist_config off
+	auto_https off
+}
+
+:{$PORT:8080} {
+	# STATIC_ROOT is optional and supports testing this file against local dist/.
+	root * {$STATIC_ROOT:/srv}
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		# Revalidate both the HTML and unversioned reference sprites on each visit.
+		Cache-Control "no-cache"
+	}
+
+	route {
+		# Keep method rejection ahead of every handler, including the healthcheck.
+		@unsupported not method GET HEAD
+		respond @unsupported "Method not allowed" 405
+
+		handle /healthz {
+			header Cache-Control "no-store"
+			respond "ok" 200
+		}
+
+		# A missing script/image must return 404, not the SPA's HTML document.
+		@static path /assets/* /fonts/* /*.*
+		handle @static {
+			file_server
+		}
+
+		# Supports direct requests to client routes as well as the current hash URLs.
+		handle {
+			try_files {path} /index.html
+			file_server
+		}
+	}
+}

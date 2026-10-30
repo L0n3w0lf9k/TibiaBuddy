@@ -1,0 +1,107 @@
+import { useEffect, useState } from 'react';
+import { Play, Pause, Square, Plus, Timer, TrendingUp, Target, ArrowUpRight, Flag, History, ChevronLeft, ChevronRight, Trash2, Check } from 'lucide-react';
+import { useApp } from '../context';
+import { Badge, EmptyState, Evidence, External, Field, Modal, Notice, PageHeader, Stat, Tabs, dateLabel, duration, number, today, uid } from '../shared';
+import { activeSeconds, checkXP, completeHunt, huntMetrics, MAX_XP, pauseHunt, resumeHunt, stopHunt, xpForLevel, xpProgress } from '../domain/xp';
+import { creatures } from '../data/game';
+import type { HuntSession } from '../types';
+
+export function clockText(seconds: number) { const n = Math.max(0, Math.floor(seconds)); return [Math.floor(n / 3600), Math.floor(n % 3600 / 60), n % 60].map(x => String(x).padStart(2, '0')).join(':'); }
+export function useNow() { const [now, setNow] = useState(Date.now()); useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 1000); const sync = () => setNow(Date.now()); document.addEventListener('visibilitychange', sync); return () => { clearInterval(id); document.removeEventListener('visibilitychange', sync); }; }, []); return now; }
+
+export default function Hunts() {
+  const { state, character, update, notify, openProfile, navigate } = useApp();
+  const now = useNow();
+  const [tab, setTab] = useState('sessions');
+  const [modal, setModal] = useState<'start'|'manual'|'finish'|'checkpoint'|null>(window.location.hash.endsWith('/start') && !state.hunts.some(h=>h.characterId===character.id && h.status!=='completed') ? 'start' : null);
+  const [detail, setDetail] = useState<string|null>(null);
+  const own = state.hunts.filter(h => h.characterId === character.id);
+  const current = own.find(h => h.status !== 'completed');
+  const completed = own.filter(h => h.status === 'completed').sort((a,b) => b.startedAt - a.startedAt);
+  const m = current ? huntMetrics(current, now) : null;
+  const sumXP = completed.reduce((s,h) => s + ((h.endXP ?? h.startXP) - h.startXP), 0), sumTime = completed.reduce((s,h) => s + activeSeconds(h), 0);
+  const progress = xpProgress(character.xp);
+  const runAction = async (action: 'pause'|'resume'|'stop') => {
+    if (!current) return;
+    await update(d => { const h = d.hunts.find(x => x.id === current.id); if (!h) return; if (action === 'pause') pauseHunt(h, Date.now()); if (action === 'resume') resumeHunt(h, Date.now()); if (action === 'stop') stopHunt(h, Date.now()); });
+    if (action === 'stop') setModal('finish');
+  };
+  const selected = detail ? own.find(h => h.id === detail) : undefined;
+  return <>
+    <PageHeader eyebrow="MAKE EVERY HUNT COUNT" title="Hunts & experience" description="Track your sessions. Know your pace. Plan your next level." actions={<><button className="btn btn-secondary" onClick={() => setModal('manual')}><Plus size={16}/> Log a hunt</button><button className="btn btn-primary" onClick={() => current ? document.getElementById('active-hunt')?.scrollIntoView({behavior:'smooth'}) : setModal('start')}><Play size={16}/>{current ? 'Current session' : 'Start hunting'}</button></>}/>
+    <Tabs tabs={[{id:'sessions',label:'Hunt journal',count:completed.length},{id:'experience',label:'Experience planner'}]} value={tab} onChange={setTab}/>
+    {tab === 'sessions' ? <>
+      {current && m && <section className="active-hunt card" id="active-hunt">
+        <div className="section-heading"><div className="inline"><span className={'live-dot ' + (current.status === 'running' ? '' : 'paused')}/><strong>{current.status === 'running' ? 'Hunt in progress' : current.status === 'paused' ? 'Session paused' : 'Ready to finish'}</strong><Badge tone="green">{current.location || 'Unnamed hunt'}</Badge></div><span className="muted">Started {new Date(current.startedAt).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</span></div>
+        <div className="timer-layout"><div><div className="timer-value">{clockText(m.seconds)}</div><div className="muted">Active hunting time · pauses excluded</div></div><div className="timer-metric"><span>Recorded gain</span><strong>{m.gain === null ? '—' : (m.gain > 0 ? '+' : '') + number(m.gain)}</strong><small>{m.checkpoint ? 'At your latest XP checkpoint' : 'Add a checkpoint to see your pace'}</small></div><div className="timer-metric"><span>Experience / hour</span><strong>{m.rate === null ? '—' : number(m.rate)}</strong><small>{m.eta === null ? 'Waiting for recorded experience' : duration(m.eta) + ' of hunting to level ' + ((m.progress?.level ?? 0) + 1)}</small></div></div>
+        <div className="timer-controls">{current.status === 'running' && <button className="btn btn-secondary" onClick={() => void runAction('pause')}><Pause size={16}/>Pause</button>}{current.status === 'paused' && <button className="btn btn-primary" onClick={() => void runAction('resume')}><Play size={16}/>Resume</button>}{current.status !== 'awaiting_xp' && <><button className="btn btn-secondary" onClick={() => setModal('checkpoint')}><Flag size={16}/>Add XP checkpoint</button><button className="btn btn-dark" onClick={() => void runAction('stop')}><Square size={14}/>Stop & finish</button></>}{current.status === 'awaiting_xp' && <button className="btn btn-primary" onClick={() => setModal('finish')}><Check size={16}/>Enter final XP</button>}<span className="save-caption">Timer saved on this device</span></div>
+      </section>}
+      <div className="stat-grid"><Stat label="Experience gained" value={(sumXP > 0 ? '+' : '') + number(sumXP)} detail="Across completed sessions" icon={<TrendingUp size={18}/>}/><Stat label="Average XP / hour" value={sumTime ? number(sumXP / sumTime * 3600) : '—'} detail="Weighted by active hunt time" icon={<ArrowUpRight size={18}/>}/><Stat label="Time in the field" value={sumTime ? duration(sumTime) : '0h 0m'} detail={completed.length + ' completed ' + (completed.length === 1 ? 'hunt' : 'hunts')} icon={<Timer size={18}/>}/><Stat label={'Next: level ' + (progress.level + 1)} value={number(progress.remaining)} detail={character.xpEstimated ? 'XP remaining · approximate profile XP' : 'Experience remaining'} icon={<Target size={18}/>}/></div>
+      <section className="card"><div className="section-heading"><div><h2>Hunt journal</h2><p>A little history goes a long way.</p></div><Badge>{character.name}</Badge></div>
+      {completed.length ? <div className="table-wrap"><table className="data-table"><thead><tr><th>Hunt</th><th>Date</th><th>Active time</th><th className="numeric">XP gained</th><th className="numeric">XP / hour</th><th/></tr></thead><tbody>{completed.map(h => { const stats = huntMetrics(h); return <tr key={h.id}><td><button className="text-button strong" onClick={() => setDetail(h.id)}>{h.location || 'Unnamed hunt'}</button>{h.notes && <small className="cell-note">{h.notes.slice(0,70)}</small>}</td><td>{dateLabel(h.startedAt)}</td><td>{duration(stats.seconds)}</td><td className={'numeric ' + ((stats.gain ?? 0) >= 0 ? 'positive' : 'negative')}>{(stats.gain ?? 0) > 0 ? '+' : ''}{number(stats.gain ?? 0)}</td><td className="numeric">{stats.rate === null ? '—' : number(stats.rate)}</td><td><button className="icon-btn" aria-label={'View ' + (h.location || 'hunt')} onClick={() => setDetail(h.id)}><ArrowUpRight size={17}/></button></td></tr>; })}</tbody></table></div> : <EmptyState icon={<History size={29}/>} title="Your next hunt starts here" description="Enter your starting XP, run the timer, then record your ending XP. Your pace and next level estimate will follow." action={<button className="btn btn-primary" onClick={() => current ? setModal('finish') : setModal('start')} disabled={!!current && current.status !== 'awaiting_xp'}><Play size={16}/>{current ? 'Finish your first hunt' : 'Start your first hunt'}</button>}/>}
+      </section>
+    </> : <ExperiencePlanner openProfile={openProfile}/>}
+    {modal && <HuntForm mode={modal} current={current} onClose={() => {setModal(null); if(window.location.hash.endsWith('/start'))navigate('hunts');}}/>}
+    {selected && <Modal title={selected.location || 'Hunt details'} onClose={() => setDetail(null)}><div className="detail-grid"><div><span>Starting XP</span><strong>{number(selected.startXP)}</strong></div><div><span>Ending XP</span><strong>{selected.endXP === null ? '—' : number(selected.endXP)}</strong></div><div><span>Active time</span><strong>{duration(activeSeconds(selected))}</strong></div><div><span>XP / hour</span><strong>{number(huntMetrics(selected).rate ?? 0)}</strong></div><div><span>Next level at this pace</span><strong>{huntMetrics(selected).eta === null ? '—' : duration(huntMetrics(selected).eta!)}</strong></div><div><span>Recorded</span><strong>{dateLabel(selected.startedAt)}</strong></div></div>{selected.notes && <p className="detail-notes">{selected.notes}</p>}{selected.checkpoints.length > 0 && <div className="stack"><h3>Checkpoints</h3>{selected.checkpoints.map(c => <div className="list-row" key={c.id}><span>{duration(c.activeSeconds)} into hunt</span><strong>{number(c.xp)} XP</strong></div>)}</div>}<div className="modal-actions"><button className="btn btn-danger-ghost" onClick={async () => { await update(d => { d.hunts = d.hunts.filter(h => h.id !== selected.id); }); setDetail(null); notify('Hunt removed. Character XP has not changed.'); }}><Trash2 size={16}/>Delete record</button><button className="btn btn-primary" onClick={() => setDetail(null)}>Done</button></div></Modal>}
+  </>;
+}
+
+function HuntForm({mode,current,onClose}:{mode:'start'|'manual'|'finish'|'checkpoint';current?:HuntSession;onClose:()=>void}) {
+  const { character, update, notify } = useApp();
+  const [startXP,setStartXP] = useState(character.xpEstimated ? '' : String(character.xp));
+  const [endXP,setEndXP] = useState(''); const [location,setLocation] = useState(current?.location ?? ''); const [notes,setNotes] = useState(current?.notes ?? '');
+  const [minutes,setMinutes] = useState('60'); const [date,setDate] = useState(today()); const [updateCharacter,setUpdateCharacter] = useState(mode === 'finish');
+  const [error,setError] = useState(''); const [saving,setSaving] = useState(false);
+  const title = {start:'Start a hunt',manual:'Log a completed hunt',finish:'Finish your hunt',checkpoint:'Add an XP checkpoint'}[mode];
+  const save = async (event: React.FormEvent) => {
+    event.preventDefault(); if (saving) return; setError(''); setSaving(true);
+    try {
+      const a = mode === 'start' || mode === 'manual' ? checkXP(Number(startXP)) : 0;
+      const b = mode !== 'start' ? checkXP(Number(endXP)) : 0;
+      if ((mode === 'start' || mode === 'manual') && !startXP.trim()) throw new Error('Enter your starting experience.');
+      if (mode !== 'start' && !endXP.trim()) throw new Error('Enter your current or final experience.');
+      const at = Date.now();
+      await update(d => {
+        if (mode === 'start') {
+          if (d.hunts.some(h => h.characterId === character.id && h.status !== 'completed')) throw new Error('This character already has an unfinished hunt.');
+          d.hunts.push({id:uid(),characterId:character.id,serverId:character.serverId,startedAt:at,stoppedAt:null,startXP:a,endXP:null,location:location.trim(),notes,intervals:[{start:at,end:null}],checkpoints:[],status:'running'});
+        } else if (mode === 'manual') {
+          const seconds = Number(minutes) * 60;
+          if (!Number.isFinite(seconds) || seconds <= 0) throw new Error('Enter a positive active duration.');
+          const startedAt = new Date(date + 'T12:00:00').getTime(); if (!Number.isFinite(startedAt)) throw new Error('Choose a valid date.');
+          d.hunts.push({id:uid(),characterId:character.id,serverId:character.serverId,startedAt,stoppedAt:startedAt+seconds*1000,startXP:a,endXP:b,location:location.trim(),notes,intervals:[],checkpoints:[],status:'completed',durationOverride:seconds});
+        } else {
+          const h = d.hunts.find(x => x.id === current?.id); if (!h) throw new Error('This hunt is no longer available.');
+          if (mode === 'finish') { completeHunt(h,b); h.location=location.trim(); h.notes=notes; }
+          else { if (h.status !== 'running' && h.status !== 'paused') throw new Error('This hunt has already stopped.'); const seconds = activeSeconds(h,at); if (seconds <= 0) throw new Error('Wait a moment after starting the timer.'); h.checkpoints.push({id:uid(),at,xp:b,activeSeconds:seconds}); }
+        }
+        if (mode !== 'start' && updateCharacter) { const c = d.characters.find(x => x.id === character.id)!; const p=xpProgress(b); c.xp=b; c.level=p.level; c.percentRemaining=100-p.percent; c.xpEstimated=false; }
+      });
+      notify(mode === 'start' ? 'Your hunt is running. Good luck out there.' : mode === 'checkpoint' ? 'Checkpoint recorded. Your pace is updated.' : 'Hunt saved to your journal.'); onClose();
+    } catch(e) { setError(e instanceof Error ? e.message : 'Could not save this hunt.'); } finally { setSaving(false); }
+  };
+  return <Modal title={title} onClose={onClose}><form onSubmit={save} className="stack">
+    {mode === 'finish' && current && <div className="finish-time"><Timer size={20}/><div><strong>{clockText(activeSeconds(current))}</strong><small>Timer stopped. Take your time entering the final XP.</small></div></div>}
+    {(mode === 'start' || mode === 'manual') && <Field label="Starting experience" hint={character.xpEstimated ? 'Your imported profile estimates ' + number(character.xp) + ' XP. Enter the exact value from the game.' : 'Total experience shown in your character skills window.'}><input autoFocus required type="number" min="0" max={MAX_XP} step="1" value={startXP} onChange={e => setStartXP(e.target.value)} placeholder={String(character.xp)}/></Field>}
+    {mode !== 'start' && <Field label={mode === 'checkpoint' ? 'Current total experience' : 'Ending experience'} hint="A loss of experience is allowed and will be recorded accurately."><input autoFocus={mode !== 'manual'} required type="number" min="0" max={MAX_XP} step="1" value={endXP} onChange={e => setEndXP(e.target.value)} placeholder="Enter total XP"/></Field>}
+    {mode !== 'checkpoint' && <><Field label="Hunting spot"><input value={location} onChange={e=>setLocation(e.target.value)} placeholder="e.g. Edron rotworms" maxLength={100}/></Field>{mode === 'manual' && <div className="form-grid"><Field label="Date"><input required type="date" value={date} onChange={e=>setDate(e.target.value)}/></Field><Field label="Active hunting time (minutes)"><input required type="number" min="0.01" step="0.01" value={minutes} onChange={e=>setMinutes(e.target.value)}/></Field></div>}<Field label="Notes"><textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Loot, supplies, lessons learned…" rows={3} maxLength={3000}/></Field></>}
+    {mode !== 'start' && <label className="check-field"><input type="checkbox" checked={updateCharacter} onChange={e=>setUpdateCharacter(e.target.checked)}/>Update {character.name}'s experience and level</label>}
+    {mode === 'start' && <p className="helper">The timer survives refreshes and keeps counting while this page is closed. Pause it when you take a break.</p>}
+    {error && <Notice tone="error">{error}</Notice>}<div className="modal-actions"><button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button><button className="btn btn-primary" disabled={saving}>{saving ? 'Saving…' : mode === 'start' ? 'Start timer' : mode === 'checkpoint' ? 'Save checkpoint' : 'Save hunt'}</button></div>
+  </form></Modal>;
+}
+
+function ExperiencePlanner({openProfile}:{openProfile:()=>void}) {
+  const {character,server,state,update} = useApp();
+  const p=xpProgress(character.xp); const [goal,setGoal]=useState(p.level+1); const [page,setPage]=useState(Math.max(1,p.level-2));
+  const [creatureId,setCreatureId]=useState(''); const selected = (state.preferences['xpCreatureIds:'+character.id] ?? state.preferences.xpCreatureIds ?? []) as string[];
+  const targetXP=xpForLevel(Math.min(10000,Math.max(1,goal||1))); const remaining=Math.max(0,targetXP-character.xp);
+  const eligible=creatures.filter(c=>c.experience!==null && c.experience>0).sort((a,b)=>a.name.localeCompare(b.name));
+  const toggle = async (id:string,add:boolean) => { await update(d=> { const key='xpCreatureIds:'+character.id; const ids=(d.preferences[key] ?? d.preferences.xpCreatureIds ?? []) as string[]; d.preferences[key]=add ? [...new Set([...ids,id])] : ids.filter(x=>x!==id); }); };
+  return <div className="stack-lg">
+    <div className="grid-2"><section className="card padded"><div className="section-heading"><h2>Your experience</h2><button className="text-button" onClick={openProfile}>Update profile <ArrowUpRight size={14}/></button></div><div className="level-progress-title"><strong>Level {p.level}</strong><span>{number(p.percent,2)}% complete</span></div><div className="progress-track large"><div style={{width:p.percent+'%'}}/></div><div className="progress-labels"><span>{number(character.xp)} XP {character.xpEstimated && <Badge tone="gold">Estimated</Badge>}</span><span>{number(p.next)} XP</span></div><p className="helper">{number(p.remaining)} XP to level {p.level+1}. The same experience table applies to every vocation.</p></section><section className="card padded"><h2>Set your sights</h2><div className="goal-row"><Field label="Target level"><input type="number" min={1} max={10000} step={1} value={goal} onChange={e=>setGoal(Math.min(10000,Math.max(1,Math.trunc(Number(e.target.value)))))} /></Field><div><span className="muted">Experience to earn</span><strong className="big-number">{number(remaining)}</strong></div></div><p className="helper">Creature estimates use {number(server.xpRate,2)}× XP on {server.name}. Recorded hunt XP is already earned and is never multiplied.</p></section></div>
+    <section className="card"><div className="section-heading"><div><h2>How many creatures?</h2><p>Solo kills to reach level {goal}, before other bonuses.</p></div><div className="inline"><select aria-label="Add creature to XP planner" value={creatureId} onChange={e=>{setCreatureId('');if(e.target.value)void toggle(e.target.value,true);}}><option value="">Add a creature…</option>{eligible.filter(c=>!selected.includes(c.id)).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></div></div><div className="table-wrap"><table className="data-table"><thead><tr><th>Creature</th><th className="numeric">Base XP</th><th className="numeric">XP on your server</th><th className="numeric">Kills remaining</th><th/></tr></thead><tbody>{selected.map(id=>{const c=creatures.find(x=>x.id===id);if(!c)return null;const value=c.experience===null?null:c.experience*server.xpRate;return <tr key={id}><td className="strong">{c.name}</td><td className="numeric">{c.experience===null?'Unknown':number(c.experience)}</td><td className="numeric">{value===null?'—':number(value,2)}</td><td className="numeric strong">{value && value>0?number(Math.ceil(remaining/value)):'—'}</td><td><button className="icon-btn" aria-label={'Remove '+c.name} onClick={()=>void toggle(id,false)}><Trash2 size={15}/></button></td></tr>;})}</tbody></table>{!selected.length&&<EmptyState title="Choose your hunting targets" description="Add creatures above to compare kills needed for your next level."/>}</div><p className="table-footnote">Creature XP uses the classic reference catalogue; field sources and review status are available in the Library.</p></section>
+    <section className="card"><div className="section-heading"><div><h2>Experience table</h2><p>Shared by all vocations and promotions.</p></div><div className="inline"><label className="inline-label">From level <input aria-label="Experience table starting level" className="short-input" type="number" min={1} max={9981} step={1} value={page} onChange={e=>setPage(Math.max(1,Math.min(9981,Math.trunc(Number(e.target.value)))))} /></label><button className="icon-btn" aria-label="Previous 20 levels" disabled={page<=1} onClick={()=>setPage(Math.max(1,page-20))}><ChevronLeft size={18}/></button><button className="icon-btn" aria-label="Next 20 levels" disabled={page>=9981} onClick={()=>setPage(Math.min(9981,page+20))}><ChevronRight size={18}/></button></div></div><div className="table-wrap xp-table"><table className="data-table"><thead><tr><th>Level</th><th className="numeric">Total experience</th><th className="numeric">XP to next level</th><th className="numeric">XP from your profile</th></tr></thead><tbody>{Array.from({length:20},(_,i)=>page+i).map(level=><tr key={level} className={level===p.level?'highlight-row':''}><td><strong>{level}</strong>{level===p.level&&<Badge tone="green">You are here</Badge>}</td><td className="numeric">{number(xpForLevel(level))}</td><td className="numeric">{number(xpForLevel(level+1)-xpForLevel(level))}</td><td className="numeric">{number(Math.max(0,xpForLevel(level)-character.xp))}</td></tr>)}</tbody></table></div></section>
+    <Evidence><p>Total XP at level L = (50L³ − 300L² + 850L − 600) ÷ 3. XP/hour = actual XP gained ÷ active seconds × 3,600. Next-level ETA uses the next threshold after your latest recorded XP. The timer does not read the game; live pace changes only when you add a checkpoint.</p><p>Percentage-based workbook experience is approximate. A rounded 0% remaining is kept within its recorded level until exact XP confirms the advance.</p><External href="https://www.tibialegacy.com/calculators.php">Classic experience table reference</External></Evidence>
+  </div>;
+}
