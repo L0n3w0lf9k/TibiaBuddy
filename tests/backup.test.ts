@@ -29,6 +29,18 @@ test('null catalogue clears and server-specific edits survive JSON restore', () 
   state.offerOverrides[server + '::' + state.offers[0].id] = { price: 9, enabled: false, notes: 'Local change' };
   validateBackup(JSON.parse(JSON.stringify(state)));
 });
+test('physical skill rates round-trip while older backups retain their 1x fallback', () => {
+  const state = makeTestState();
+  assert.equal(state.servers[0].skillRate, undefined);
+  validateBackup(state);
+  state.servers[0].skillRate = 2.5;
+  const restored = JSON.parse(JSON.stringify(state));
+  validateBackup(restored);
+  assert.equal(restored.servers[0].skillRate, 2.5);
+  for (const rate of [0, -1, 0.001, 1001, Number.NaN, null]) {
+    bad(s => { s.servers[0].skillRate = rate as number; }, /server skillRate/);
+  }
+});
 test('valid partial delivery and cancellation keep advance-payment refund due', () => {
   const state = makeTestState(), order = newOrder(state), lot = state.lots[0];
   allocateOrder(state, order.id);

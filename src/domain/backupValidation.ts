@@ -78,6 +78,7 @@ export function validateBackup(data: unknown): asserts data is AppState {
   for (const server of s.servers) {
     string(server.name, 'server name', true); string(server.pricePreset, 'merchant preset');
     for (const field of ['xpRate', 'magicRate', 'regenerationRate'] as const) numeric(server[field], 'server ' + field, 0.01, 1000);
+    if (server.skillRate !== undefined) numeric(server.skillRate, 'server skillRate', 0.01, 1000);
     if (server.ruleset !== 'tibia77') fail('mechanics ruleset', 'is not supported.');
   }
   for (const c of s.characters) {

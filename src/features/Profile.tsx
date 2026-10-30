@@ -23,7 +23,7 @@ export default function Profile({create=false,onClose}:{create?:boolean;onClose:
     const xp=xpMode==='exact'?checkXP(draft.xp):xpFromRemaining(draft.level,draft.percentRemaining);
     const p=xpProgress(xp); const next={...draft,name:draft.name.trim(),xp,level:p.level,percentRemaining:100-p.percent,xpEstimated:xpMode==='percentage'};
     if(next.vocation==='unselected')next.promoted=false;
-    await update(d=>{if(create){if(next.serverId==='new'){if(!newServer.trim())throw new Error('Enter a server name.');next.serverId=uid();d.servers.push({id:next.serverId,name:newServer.trim(),xpRate:1,regenerationRate:1,magicRate:1,ruleset:'tibia77',pricePreset:'Project Fibula'});}d.characters.push(next);d.activeCharacterId=next.id;}else{const i=d.characters.findIndex(c=>c.id===character.id);if(i<0)throw new Error('Character no longer exists.');d.characters[i]=next;}});
+    await update(d=>{if(create){if(next.serverId==='new'){if(!newServer.trim())throw new Error('Enter a server name.');next.serverId=uid();d.servers.push({id:next.serverId,name:newServer.trim(),xpRate:1,regenerationRate:1,magicRate:1,skillRate:1,ruleset:'tibia77',pricePreset:'Project Fibula'});}d.characters.push(next);d.activeCharacterId=next.id;}else{const i=d.characters.findIndex(c=>c.id===character.id);if(i<0)throw new Error('Character no longer exists.');d.characters[i]=next;}});
     notify(create?'Character created. Your new adventure is ready.':'Character profile saved.');onClose();
   }catch(e){setError(e instanceof Error?e.message:'Could not save profile.');}finally{setSaving(false);}};
   return <Modal title={create?'Add a character':'Character profile'} onClose={onClose} wide><form onSubmit={save} className="stack">

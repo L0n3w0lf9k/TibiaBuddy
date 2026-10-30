@@ -8,6 +8,8 @@ export interface Character {
 }
 export interface ServerProfile {
   id: string; name: string; xpRate: number; regenerationRate: number; magicRate: number;
+  /** Physical skill progress per credited attempt; omitted in older backups means 1×. */
+  skillRate?: number;
   ruleset: 'tibia77'; pricePreset: string;
 }
 export interface Item {

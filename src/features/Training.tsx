@@ -6,6 +6,7 @@ import type { Vocation } from '../types';
 import { spells } from '../data/game';
 import { FOODS, RUNE_RECIPES, SOURCES, VOCATIONS, characterStats, foodPlan, magicMultiplier, magicPlan,
   manaFluidPlan, regeneration, runePlan } from '../domain/mechanics';
+import SkillTraining from './SkillTraining';
 
 function Numeric({ value, onChange, min = 0, max, step = 1 }: {
   value: number; onChange: (value: number) => void; min?: number; max?: number; step?: number | 'any';
@@ -279,16 +280,26 @@ function RuneView({ vocation, promoted }: { vocation: Vocation; promoted: boolea
   </>;
 }
 
+function trainingTabFromHash() {
+  const section = window.location.hash.replace(/^#\/?/, '').split('/')[1];
+  return ['food', 'skills', 'magic', 'runes'].includes(section) ? section : 'food';
+}
+
 export default function Training() {
-  const { character, server, openProfile } = useApp();
-  const [tab, setTab] = useState('food');
+  const { character, server, openProfile, navigate } = useApp();
+  const [tab, setTab] = useState(trainingTabFromHash);
   const [vocation, setVocation] = useState<Vocation>(character.vocation);
   const [promoted, setPromoted] = useState(character.promoted);
   useEffect(() => { setVocation(character.vocation); setPromoted(character.promoted); }, [character.id, character.vocation, character.promoted]);
+  useEffect(() => {
+    const syncTab = () => setTab(trainingTabFromHash());
+    window.addEventListener('hashchange', syncTab);
+    return () => window.removeEventListener('hashchange', syncTab);
+  }, []);
   const preview = vocation !== character.vocation || promoted !== character.promoted;
   const mage = vocation === 'sorcerer' || vocation === 'druid';
   return <>
-    <PageHeader eyebrow="PROGRESS & PREPARATION" title="Training" description="Plan your food, magic-level goals and rune supplies." actions={<button className="btn" onClick={openProfile}>Character profile</button>} />
+    <PageHeader eyebrow="PROGRESS & PREPARATION" title="Training" description="Plan physical skills, food, magic levels and rune supplies." actions={<button className="btn" onClick={openProfile}>Character profile</button>} />
     <section className="card">
       <div className="toolbar"><h2>Training profile</h2><Badge tone={preview ? 'blue' : 'muted'}>{preview ? 'Temporary preview' : character.name}</Badge></div>
       <div className="form-grid">
@@ -297,10 +308,11 @@ export default function Training() {
         </select></Field>
         <Field label="Promotion"><select value={promoted ? 'yes' : 'no'} onChange={e => setPromoted(e.target.value === 'yes')}><option value="no">Not promoted</option><option value="yes">Promoted</option></select></Field>
       </div>
-      <p className="muted">{server.name} · Regeneration ×{number(server.regenerationRate, 2)} · Magic progress ×{number(server.magicRate, 2)}{preview ? ' · Preview changes do not alter your saved character.' : ''}</p>
+      <p className="muted">{server.name} · Regeneration ×{number(server.regenerationRate, 2)} · Magic progress ×{number(server.magicRate, 2)} · Skill progress ×{number(server.skillRate ?? 1, 2)}{preview ? ' · Preview changes do not alter your saved character.' : ''}</p>
     </section>
-    <Tabs tabs={[{ id: 'food', label: 'Food & regeneration' }, { id: 'magic', label: 'Magic level' }, { id: 'runes', label: mage ? 'Rune production' : 'Rune production · optional' }]} value={tab} onChange={setTab} />
+    <Tabs tabs={[{ id: 'food', label: 'Food & regeneration' }, { id: 'skills', label: 'Physical skills' }, { id: 'magic', label: 'Magic level' }, { id: 'runes', label: mage ? 'Rune production' : 'Rune production · optional' }]} value={tab} onChange={selected => { setTab(selected); navigate('training/' + selected); }} />
     {tab === 'food' && <FoodView key={character.id} vocation={vocation} promoted={promoted} />}
+    {tab === 'skills' && <SkillTraining key={character.id} vocation={vocation} promoted={promoted} />}
     {tab === 'magic' && <MagicView key={character.id} vocation={vocation} promoted={promoted} />}
     {tab === 'runes' && <RuneView key={character.id} vocation={vocation} promoted={promoted} />}
   </>;

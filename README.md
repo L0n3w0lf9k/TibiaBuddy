@@ -19,6 +19,14 @@ IndexedDB belongs to a particular browser profile and website origin. It does no
 
 Anything placed in `src/` or `public/` can become public in the compiled website. Keep personal exports, credentials, and private workbook records out of those directories and out of the GitHub repository. `.dockerignore` excludes common backup and local development files from the build context.
 
+## Physical skill planner
+
+Training → Physical skills estimates axe, sword, club, fist, distance and shielding goals for all four classic vocations. Enter the attained skill, percentage still remaining, target skill, and one, two or three incoming creatures. Each server has a separate physical skill multiplier; older backups without it use 1×.
+
+The visible estimate assumes a fixed two-second cycle and uninterrupted qualifying training. Shielding requires an equipped shield and counts at most two eligible incoming melee checks per cycle. Additional creatures do not increase the outgoing weapon attack rate. Periodic outgoing HP damage must keep the shared learning allowance active; one attempted attack every cycle does not by itself guarantee continuous advancement. Distance is explicitly a perfect-landed-shot lower bound.
+
+Requirements come from the labeled public 7.72 reconstruction linked in the calculator. Cumulative geometric thresholds are evaluated with exact rational factors and rounded down, remaining progress is rounded up, and time is rounded to whole cycles across the entire goal. This avoids independently rounding each level's duration and preserves excess progress between levels. Promotion does not change the physical skill curve in this model. These are conditional estimates, not independent certification of every original 7.7 mechanic or a promise of a specific server's results.
+
 ## Local development
 
 Use Node 24 and npm. The lockfile records the dependency graph.

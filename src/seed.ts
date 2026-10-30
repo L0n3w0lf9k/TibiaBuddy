@@ -14,7 +14,7 @@ export function makeSeed(): AppState {
   return {
     schemaVersion: 1, revision: 1, activeCharacterId: characterId,
     characters: [emptyCharacter(characterId, 'My character', serverId)],
-    servers: [{ id: serverId, name: 'My server', xpRate: 1, regenerationRate: 1, magicRate: 1, ruleset: 'tibia77', pricePreset: 'Project Fibula' }],
+    servers: [{ id: serverId, name: 'My server', xpRate: 1, regenerationRate: 1, magicRate: 1, skillRate: 1, ruleset: 'tibia77', pricePreset: 'Project Fibula' }],
     items, npcs: fibula.npcs.map(n => ({ id: n.id, name: n.name, city: n.city_imported })),
     offers: fibula.offers.map(o => ({ id: o.id, itemId: o.item_id, npcId: o.npc_id, direction: o.direction === 'npc_buys_from_player' ? 'buy' : 'sell', price: o.unit_price_gp, enabled: o.enabled, sourcePresetId: fibula.preset_id })),
     itemOverrides: {}, npcOverrides: {}, offerOverrides: {},
